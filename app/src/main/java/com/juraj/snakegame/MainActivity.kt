@@ -53,7 +53,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-data class State(val food: Pair<Int, Int>, val snake: List<Pair<Int, Int>>)
+data class State(val foodPosition: Pair<Int, Int>, val currentFoodLetter: Char, val snake: List<Pair<Int, Int>>)
 
 class Game(private val scope: CoroutineScope) {
 
@@ -62,7 +62,7 @@ class Game(private val scope: CoroutineScope) {
 
     private val mutex = Mutex()
     private val mutableState =
-        MutableStateFlow(State(food = Pair(5, 5), snake = listOf(Pair(7, 7))))
+        MutableStateFlow(State(foodPosition = Pair(5, 5), currentFoodLetter = 'a', snake = listOf(Pair(7, 7))))
     val state: StateFlow<State> = mutableState // Changed Flow to StateFlow
 
     var move = Pair(1, 0)
@@ -102,8 +102,10 @@ class Game(private val scope: CoroutineScope) {
                         }
                     }
 
-                    if (newPosition == it.food) {
+                    var nextFoodLetter = it.currentFoodLetter
+                    if (newPosition == it.foodPosition) {
                         snakeLength++
+                        nextFoodLetter = if (it.currentFoodLetter == 'z') 'a' else it.currentFoodLetter + 1
                     }
 
                     if (it.snake.contains(newPosition)) {
@@ -111,10 +113,11 @@ class Game(private val scope: CoroutineScope) {
                     }
 
                     it.copy(
-                        food = if (newPosition == it.food) Pair(
+                        foodPosition = if (newPosition == it.foodPosition) Pair(
                             Random().nextInt(BOARD_SIZE),
                             Random().nextInt(BOARD_SIZE)
-                        ) else it.food,
+                        ) else it.foodPosition,
+                        currentFoodLetter = nextFoodLetter,
                         snake = listOf(newPosition) + it.snake.take(snakeLength - 1)
                     )
                 }
