@@ -1,5 +1,6 @@
 package com.juraj.snakegame
 
+import android.R.attr.maxWidth
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,12 +10,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
+import androidx.compose.material.Text // Added import
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue // Added for 'by' delegate with collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -22,8 +25,8 @@ import androidx.lifecycle.lifecycleScope
 import com.juraj.snakegame.ui.theme.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow // Added import
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -54,10 +57,13 @@ data class State(val food: Pair<Int, Int>, val snake: List<Pair<Int, Int>>)
 
 class Game(private val scope: CoroutineScope) {
 
+    private val mutableIsPaused = MutableStateFlow(false)
+    val isPaused: StateFlow<Boolean> = mutableIsPaused
+
     private val mutex = Mutex()
     private val mutableState =
         MutableStateFlow(State(food = Pair(5, 5), snake = listOf(Pair(7, 7))))
-    val state: Flow<State> = mutableState
+    val state: StateFlow<State> = mutableState // Changed Flow to StateFlow
 
     var move = Pair(1, 0)
         set(value) {
@@ -68,12 +74,24 @@ class Game(private val scope: CoroutineScope) {
             }
         }
 
+    fun togglePause() {
+        mutableIsPaused.value = !mutableIsPaused.value
+    }
+
     init {
         scope.launch {
-            var snakeLength = 4
+            var snakeLength = INITIAL_SNAKE_LENGTH
 
             while (true) {
-                delay(150)
+                if (mutableIsPaused.value) {
+                    delay(100L) // Small delay to prevent a busy loop while paused
+                    continue
+                }
+                val foodEaten = snakeLength - INITIAL_SNAKE_LENGTH
+                val currentDelay = BASE_DELAY_MS - (foodEaten * DELAY_DECREASE_PER_FOOD_MS)
+                val actualDelay = currentDelay.coerceAtLeast(MIN_DELAY_MS)
+
+                delay(actualDelay)
                 mutableState.update {
                     val newPosition = it.snake.first().let { poz ->
                         mutex.withLock {
@@ -89,7 +107,7 @@ class Game(private val scope: CoroutineScope) {
                     }
 
                     if (it.snake.contains(newPosition)) {
-                        snakeLength = 4
+                        snakeLength = INITIAL_SNAKE_LENGTH // Reset to initial length
                     }
 
                     it.copy(
@@ -105,20 +123,29 @@ class Game(private val scope: CoroutineScope) {
     }
 
     companion object {
-        const val BOARD_SIZE = 16
+        const val BOARD_SIZE = 32
+        const val INITIAL_SNAKE_LENGTH = 4     // Starting length of the snake
+        const val BASE_DELAY_MS = 200L         // Delay at initial length (milliseconds)
+        const val MIN_DELAY_MS = 50L           // Minimum delay (fastest speed)
+        const val DELAY_DECREASE_PER_FOOD_MS = 5L // How much delay decreases per food item
     }
 }
 
 @Composable
 fun Snake(game: Game) {
-    val state = game.state.collectAsState(initial = null)
+    val gameState by game.state.collectAsState()
+    val isPaused by game.isPaused.collectAsState()
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        state.value?.let {
-            Board(it)
-        }
+        Board(gameState) // This will call the Board function from Board.kt
         Buttons {
             game.move = it
+        }
+        Button(
+            onClick = { game.togglePause() },
+            modifier = Modifier.padding(top = 16.dp) // Add some spacing
+        ) {
+            Text(if (isPaused) "Resume" else "Pause")
         }
     }
 
@@ -146,35 +173,6 @@ fun Buttons(onDirectionChange: (Pair<Int, Int>) -> Unit) {
     }
 }
 
-@Composable
-fun Board(state: State) {
-    BoxWithConstraints(Modifier.padding(16.dp)) {
-        val tileSize = maxWidth / Game.BOARD_SIZE
-
-        Box(
-            Modifier
-                .size(maxWidth)
-                .border(2.dp, DarkGreen)
-        )
-
-        Box(
-            Modifier
-                .offset(x = tileSize * state.food.first, y = tileSize * state.food.second)
-                .size(tileSize)
-                .background(
-                    DarkGreen, CircleShape
-                )
-        )
-
-        state.snake.forEach {
-            Box(
-                modifier = Modifier
-                    .offset(x = tileSize * it.first, y = tileSize * it.second)
-                    .size(tileSize)
-                    .background(
-                        DarkGreen, Shapes.small
-                    )
-            )
-        }
-    }
-}
+// Board composable is now in Board.kt
+// @Composable
+// fun Board(state: State) { ... }
