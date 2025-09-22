@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color // Added for food color
 import androidx.compose.ui.unit.sp // Added for score text size
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import com.barracuda.snakegame.R
 import com.barracuda.snakegame.ui.theme.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -32,6 +33,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import android.util.Log // Added for logging
 // import java.util.* // Prefer Kotlin's Random
 import kotlin.random.Random // Explicit import for clarity
 
@@ -160,6 +162,7 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
 
         correctEatSoundId = soundPool.load(context, R.raw.correct_eat, 1)
         wrongEatSoundId = soundPool.load(context, R.raw.wrong_eat, 1)
+        Log.d("GameSounds", "CorrectEatSoundId: $correctEatSoundId, WrongEatSoundId: $wrongEatSoundId")
     }
 
     private fun playSound(soundId: Int) {

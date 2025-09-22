@@ -7,7 +7,7 @@ android {
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.juraj.snakegame"
+        applicationId "com.barracuda.snakegame"
         minSdk 23
         targetSdk 33
         versionCode 1
