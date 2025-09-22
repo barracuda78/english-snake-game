@@ -28,16 +28,28 @@ fun Board(state: State) {
                 .border(2.dp, DarkGreen)
         )
 
-        // Display the food letter
+        // Display the target food letter
         Text(
-            text = state.currentFoodLetter.uppercase(), // Changed to uppercase
+            text = state.targetLetter.uppercase(),
             modifier = Modifier
-                .offset(x = tileSize * state.foodPosition.first, y = tileSize * state.foodPosition.second)
+                .offset(x = tileSize * state.targetLetterPosition.first, y = tileSize * state.targetLetterPosition.second)
                 .size(tileSize),
-            color = state.foodColor, // Use the random color from the state
+            color = state.targetLetterColor,
             fontSize = (tileSize.value * 0.9).sp, // Make font size relative to tile size
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Bold // Added for bold text
+        )
+
+        // Display the distractor food letter
+        Text(
+            text = state.distractorLetter.uppercase(),
+            modifier = Modifier
+                .offset(x = tileSize * state.distractorLetterPosition.first, y = tileSize * state.distractorLetterPosition.second)
+                .size(tileSize),
+            color = state.distractorLetterColor,
+            fontSize = (tileSize.value * 0.9).sp, // Make font size relative to tile size
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold
         )
 
         state.snake.forEach {

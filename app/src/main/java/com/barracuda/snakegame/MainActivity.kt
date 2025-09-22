@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue // Added for 'by' delegate with collect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color // Added for food color
+import androidx.compose.ui.unit.sp // Added for score text size
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.barracuda.snakegame.ui.theme.*
@@ -28,7 +29,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.util.*
+// import java.util.* // Prefer Kotlin's Random
+import kotlin.random.Random // Explicit import for clarity
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,10 +53,14 @@ class MainActivity : ComponentActivity() {
 }
 
 data class State(
-    val foodPosition: Pair<Int, Int>,
-    val currentFoodLetter: Char,
-    val foodColor: Color, // Added to store the current food color
-    val snake: List<Pair<Int, Int>>
+    val targetLetterPosition: Pair<Int, Int>,
+    val targetLetter: Char,
+    val targetLetterColor: Color,
+    val distractorLetterPosition: Pair<Int, Int>,
+    val distractorLetter: Char,
+    val distractorLetterColor: Color,
+    val snake: List<Pair<Int, Int>>,
+    val score: Int // Added score
 )
 
 class Game(private val scope: CoroutineScope) {
@@ -68,14 +74,57 @@ class Game(private val scope: CoroutineScope) {
         Color(0xFFFFA500), // Orange
         Color.Cyan
     )
-    private val random = kotlin.random.Random.Default // Changed to Kotlin's Random
+    private val random = Random.Default // Use Kotlin's Random
 
     private val mutableIsPaused = MutableStateFlow(false)
     val isPaused: StateFlow<Boolean> = mutableIsPaused
 
     private val mutex = Mutex()
-    private val mutableState =
-        MutableStateFlow(State(foodPosition = Pair(5, 5), currentFoodLetter = 'a', foodColor = foodColors.random(random), snake = listOf(Pair(7, 7))))
+
+    // Helper to generate a random letter, optionally excluding one
+    private fun generateRandomLetter(exclude: Char? = null): Char {
+        var letter: Char
+        do {
+            letter = ('a'..'z').random(random)
+        } while (letter == exclude)
+        return letter
+    }
+
+    // Helper to generate a safe position for food
+    private fun generateRandomSafePosition(
+        currentSnake: List<Pair<Int, Int>>,
+        vararg occupiedSpots: Pair<Int, Int>
+    ): Pair<Int, Int> {
+        var position: Pair<Int, Int>
+        val allOccupied = currentSnake.toSet() + occupiedSpots.filterNotNull().toSet()
+        do {
+            position = Pair(random.nextInt(BOARD_SIZE), random.nextInt(BOARD_SIZE))
+        } while (allOccupied.contains(position))
+        return position
+    }
+
+    private fun createInitialGameState(): State {
+        val initialSnakeBody = listOf(Pair(7, 7)) // Snake starts as a single point, grows in the loop
+        val initialTargetLetter = 'a'
+        val initialTargetLetterColor = foodColors.random(random)
+        val initialTargetLetterPosition = generateRandomSafePosition(initialSnakeBody)
+        val initialDistractorLetter = generateRandomLetter(exclude = initialTargetLetter)
+        val initialDistractorLetterColor = foodColors.random(random)
+        val initialDistractorLetterPosition =
+            generateRandomSafePosition(initialSnakeBody, initialTargetLetterPosition)
+        return State(
+            targetLetterPosition = initialTargetLetterPosition,
+            targetLetter = initialTargetLetter,
+            targetLetterColor = initialTargetLetterColor,
+            distractorLetterPosition = initialDistractorLetterPosition,
+            distractorLetter = initialDistractorLetter,
+            distractorLetterColor = initialDistractorLetterColor,
+            snake = initialSnakeBody,
+            score = 0 // Initialize score
+        )
+    }
+
+    private val mutableState = MutableStateFlow(createInitialGameState())
     val state: StateFlow<State> = mutableState // Changed Flow to StateFlow
 
     var move = Pair(1, 0)
@@ -94,19 +143,21 @@ class Game(private val scope: CoroutineScope) {
     init {
         scope.launch {
             var snakeLength = INITIAL_SNAKE_LENGTH
+            var currentScore = 0 // Local score tracking within the game loop
 
             while (true) {
                 if (mutableIsPaused.value) {
                     delay(100L) // Small delay to prevent a busy loop while paused
                     continue
                 }
-                val foodEaten = snakeLength - INITIAL_SNAKE_LENGTH
+                // val foodEaten = snakeLength - INITIAL_SNAKE_LENGTH // Not strictly needed for delay if simplified
+                val foodEaten = snakeLength - INITIAL_SNAKE_LENGTH //Re-added this line, because it is used below.
                 val currentDelay = BASE_DELAY_MS - (foodEaten * DELAY_DECREASE_PER_FOOD_MS)
                 val actualDelay = currentDelay.coerceAtLeast(MIN_DELAY_MS)
 
                 delay(actualDelay)
-                mutableState.update {
-                    val newPosition = it.snake.first().let { poz ->
+                mutableState.update { currentState ->
+                    val newHeadPosition = currentState.snake.first().let { poz ->
                         mutex.withLock {
                             Pair(
                                 (poz.first + move.first + BOARD_SIZE) % BOARD_SIZE,
@@ -115,26 +166,69 @@ class Game(private val scope: CoroutineScope) {
                         }
                     }
 
-                    var nextFoodLetter = it.currentFoodLetter
-                    var nextFoodColor = it.foodColor // Default to current color
-                    if (newPosition == it.foodPosition) {
+                    var nextTargetLetter = currentState.targetLetter
+                    var nextTargetLetterColor = currentState.targetLetterColor
+                    var nextTargetLetterPosition = currentState.targetLetterPosition
+
+                    var nextDistractorLetter = currentState.distractorLetter
+                    var nextDistractorLetterColor = currentState.distractorLetterColor
+                    var nextDistractorLetterPosition = currentState.distractorLetterPosition
+                    var newScore = currentScore
+
+                    // Tentative next snake state based on current length, before checking collisions/eating
+                    val potentialNextSnake = listOf(newHeadPosition) + currentState.snake.take(snakeLength - 1)
+
+                    if (newHeadPosition == currentState.targetLetterPosition) {
                         snakeLength++
-                        nextFoodLetter = if (it.currentFoodLetter == 'z') 'a' else it.currentFoodLetter + 1
-                        nextFoodColor = foodColors.random(random) // Pick a new random color
+                        newScore += 5
+                        // Snake grows, use its new full length for safe position generation
+                        val grownSnake = listOf(newHeadPosition) + currentState.snake.take(snakeLength - 1)
+
+                        nextTargetLetter =
+                            if (currentState.targetLetter == 'z') 'a' else currentState.targetLetter + 1
+                        nextTargetLetterColor = foodColors.random(random)
+                        nextTargetLetterPosition = generateRandomSafePosition(grownSnake)
+
+                        nextDistractorLetter = generateRandomLetter(exclude = nextTargetLetter)
+                        nextDistractorLetterColor = foodColors.random(random)
+                        nextDistractorLetterPosition =
+                            generateRandomSafePosition(grownSnake, nextTargetLetterPosition)
+
+                    } else if (newHeadPosition == currentState.distractorLetterPosition) {
+                        newScore -= 5
+                        // Regenerate the distractor, snake does not grow, target does not change
+                        nextDistractorLetter = generateRandomLetter(exclude = currentState.targetLetter)
+                        nextDistractorLetterColor = foodColors.random(random)
+                        nextDistractorLetterPosition =
+                            generateRandomSafePosition(potentialNextSnake, currentState.targetLetterPosition)
+
+                    } else if (currentState.snake.contains(newHeadPosition)) { // Self-collision
+                        snakeLength = INITIAL_SNAKE_LENGTH
+                        newScore = 0 // Reset score on collision
+                        // Regenerate both food items to avoid spawning on them after reset
+                        val resetSnake = listOf(newHeadPosition) + emptyList<Pair<Int,Int>>().take(snakeLength -1) // Simplified initial snake for placement
+
+                        nextTargetLetter = 'a' // Reset target to 'a'
+                        nextTargetLetterColor = foodColors.random(random)
+                        nextTargetLetterPosition = generateRandomSafePosition(resetSnake)
+
+                        nextDistractorLetter = generateRandomLetter(exclude = nextTargetLetter)
+                        nextDistractorLetterColor = foodColors.random(random)
+                        nextDistractorLetterPosition =
+                            generateRandomSafePosition(resetSnake, nextTargetLetterPosition)
                     }
 
-                    if (it.snake.contains(newPosition)) {
-                        snakeLength = INITIAL_SNAKE_LENGTH // Reset to initial length
-                    }
+                    currentScore = newScore // Update local score tracker
 
-                    it.copy(
-                        foodPosition = if (newPosition == it.foodPosition) Pair(
-                            random.nextInt(BOARD_SIZE), // Use the class instance of Kotlin Random
-                            random.nextInt(BOARD_SIZE)  // Use the class instance of Kotlin Random
-                        ) else it.foodPosition,
-                        currentFoodLetter = nextFoodLetter,
-                        foodColor = nextFoodColor,
-                        snake = listOf(newPosition) + it.snake.take(snakeLength - 1)
+                    currentState.copy(
+                        targetLetterPosition = nextTargetLetterPosition,
+                        targetLetter = nextTargetLetter,
+                        targetLetterColor = nextTargetLetterColor,
+                        distractorLetterPosition = nextDistractorLetterPosition,
+                        distractorLetter = nextDistractorLetter,
+                        distractorLetterColor = nextDistractorLetterColor,
+                        snake = listOf(newHeadPosition) + currentState.snake.take(snakeLength - 1),
+                        score = newScore
                     )
                 }
             }
@@ -155,7 +249,16 @@ fun Snake(game: Game) {
     val gameState by game.state.collectAsState()
     val isPaused by game.isPaused.collectAsState()
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(8.dp), // Added padding to the main column
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
+            Text(text = "Score: ${gameState.score}", fontSize = 20.sp)
+        }
         Board(gameState) // This will call the Board function from Board.kt
         Buttons {
             game.move = it
