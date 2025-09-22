@@ -1,5 +1,8 @@
 package com.barracuda.snakegame
 
+import android.content.Context
+import android.media.AudioAttributes
+import android.media.SoundPool
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -36,7 +39,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val game = Game(lifecycleScope)
+        val game = Game(lifecycleScope, this)
 
         setContent {
             SnakeGameTheme {
@@ -63,7 +66,7 @@ data class State(
     val score: Int // Added score
 )
 
-class Game(private val scope: CoroutineScope) {
+class Game(private val scope: CoroutineScope, private val context: Context) {
 
     private val foodColors: List<Color> = listOf(
         Color.Red,
@@ -75,6 +78,10 @@ class Game(private val scope: CoroutineScope) {
         Color.Cyan
     )
     private val random = Random.Default // Use Kotlin's Random
+
+    private lateinit var soundPool: SoundPool
+    private var correctEatSoundId: Int = 0
+    private var wrongEatSoundId: Int = 0
 
     private val mutableIsPaused = MutableStateFlow(false)
     val isPaused: StateFlow<Boolean> = mutableIsPaused
@@ -140,7 +147,30 @@ class Game(private val scope: CoroutineScope) {
         mutableIsPaused.value = !mutableIsPaused.value
     }
 
+    private fun loadSounds() {
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_GAME)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+
+        soundPool = SoundPool.Builder()
+            .setMaxStreams(2) // Can play 2 sounds simultaneously
+            .setAudioAttributes(audioAttributes)
+            .build()
+
+        correctEatSoundId = soundPool.load(context, R.raw.correct_eat, 1)
+        wrongEatSoundId = soundPool.load(context, R.raw.wrong_eat, 1)
+    }
+
+    private fun playSound(soundId: Int) {
+        if (soundId != 0) { // Check if sound loaded successfully
+            soundPool.play(soundId, 1.0f, 1.0f, 0, 0, 1.0f)
+        }
+    }
+
     init {
+        loadSounds() // Load sounds when Game is initialized
+
         scope.launch {
             var snakeLength = INITIAL_SNAKE_LENGTH
             var currentScore = 0 // Local score tracking within the game loop
@@ -181,6 +211,7 @@ class Game(private val scope: CoroutineScope) {
                     if (newHeadPosition == currentState.targetLetterPosition) {
                         snakeLength++
                         newScore += 5
+                        playSound(correctEatSoundId)
                         // Snake grows, use its new full length for safe position generation
                         val grownSnake = listOf(newHeadPosition) + currentState.snake.take(snakeLength - 1)
 
@@ -196,6 +227,7 @@ class Game(private val scope: CoroutineScope) {
 
                     } else if (newHeadPosition == currentState.distractorLetterPosition) {
                         newScore -= 5
+                        playSound(wrongEatSoundId)
                         // Regenerate the distractor, snake does not grow, target does not change
                         nextDistractorLetter = generateRandomLetter(exclude = currentState.targetLetter)
                         nextDistractorLetterColor = foodColors.random(random)
