@@ -1,4 +1,4 @@
-package com.juraj.snakegame
+package com.barracuda.snakegame
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

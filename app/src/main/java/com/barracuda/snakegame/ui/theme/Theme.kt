@@ -1,4 +1,4 @@
-package com.juraj.snakegame.ui.theme
+package com.barracuda.snakegame.ui.theme
 
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.lightColors

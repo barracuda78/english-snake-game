@@ -1,4 +1,4 @@
-package com.juraj.snakegame
+package com.barracuda.snakegame
 
 import org.junit.Test
 

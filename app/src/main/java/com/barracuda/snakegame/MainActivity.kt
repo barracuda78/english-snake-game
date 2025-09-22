@@ -1,13 +1,9 @@
-package com.juraj.snakegame
+package com.barracuda.snakegame
 
-import android.R.attr.maxWidth
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.Text // Added import
@@ -20,9 +16,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue // Added for 'by' delegate with collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color // Added for food color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import com.juraj.snakegame.ui.theme.*
+import com.barracuda.snakegame.ui.theme.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,16 +50,32 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-data class State(val foodPosition: Pair<Int, Int>, val currentFoodLetter: Char, val snake: List<Pair<Int, Int>>)
+data class State(
+    val foodPosition: Pair<Int, Int>,
+    val currentFoodLetter: Char,
+    val foodColor: Color, // Added to store the current food color
+    val snake: List<Pair<Int, Int>>
+)
 
 class Game(private val scope: CoroutineScope) {
+
+    private val foodColors: List<Color> = listOf(
+        Color.Red,
+        Color(0xFF007BFF), // Bright Blue
+        Color.Yellow,
+        Color.Magenta,
+        Color.White,
+        Color(0xFFFFA500), // Orange
+        Color.Cyan
+    )
+    private val random = kotlin.random.Random.Default // Changed to Kotlin's Random
 
     private val mutableIsPaused = MutableStateFlow(false)
     val isPaused: StateFlow<Boolean> = mutableIsPaused
 
     private val mutex = Mutex()
     private val mutableState =
-        MutableStateFlow(State(foodPosition = Pair(5, 5), currentFoodLetter = 'a', snake = listOf(Pair(7, 7))))
+        MutableStateFlow(State(foodPosition = Pair(5, 5), currentFoodLetter = 'a', foodColor = foodColors.random(random), snake = listOf(Pair(7, 7))))
     val state: StateFlow<State> = mutableState // Changed Flow to StateFlow
 
     var move = Pair(1, 0)
@@ -103,9 +116,11 @@ class Game(private val scope: CoroutineScope) {
                     }
 
                     var nextFoodLetter = it.currentFoodLetter
+                    var nextFoodColor = it.foodColor // Default to current color
                     if (newPosition == it.foodPosition) {
                         snakeLength++
                         nextFoodLetter = if (it.currentFoodLetter == 'z') 'a' else it.currentFoodLetter + 1
+                        nextFoodColor = foodColors.random(random) // Pick a new random color
                     }
 
                     if (it.snake.contains(newPosition)) {
@@ -114,10 +129,11 @@ class Game(private val scope: CoroutineScope) {
 
                     it.copy(
                         foodPosition = if (newPosition == it.foodPosition) Pair(
-                            Random().nextInt(BOARD_SIZE),
-                            Random().nextInt(BOARD_SIZE)
+                            random.nextInt(BOARD_SIZE), // Use the class instance of Kotlin Random
+                            random.nextInt(BOARD_SIZE)  // Use the class instance of Kotlin Random
                         ) else it.foodPosition,
                         currentFoodLetter = nextFoodLetter,
+                        foodColor = nextFoodColor,
                         snake = listOf(newPosition) + it.snake.take(snakeLength - 1)
                     )
                 }
