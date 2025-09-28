@@ -1,5 +1,6 @@
 package com.barracuda.snakegame
 
+import androidx.compose.foundation.BorderStroke // Import BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -14,7 +15,9 @@ import androidx.compose.ui.text.font.FontWeight // Added for bold text
 import androidx.compose.ui.text.style.TextAlign // Added for text alignment
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp // For text size
-import com.barracuda.snakegame.ui.theme.DarkGreen
+// import com.barracuda.snakegame.ui.theme.DarkGreen // No longer using DarkGreen from theme for border
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color // Import for custom color
 import com.barracuda.snakegame.ui.theme.Shapes
 
 @Composable
@@ -37,7 +40,20 @@ fun Board(state: State) {
         Box(
             Modifier
                 .size(totalAvailableWidth) // The bordered box takes full available space
-                .border(borderThickness, DarkGreen)
+                .border(
+                    BorderStroke( // Correctly use BorderStroke here
+                        borderThickness,
+                        Brush.linearGradient(
+                            colors = listOf(
+                                Color(0xFF00ffee),
+                                Color(0xFF00e5ff),
+                                Color(0xFF00ffee)
+                            )
+                        )
+                    )
+                    // If you want a specific shape for the border, like rounded corners:
+                    // , shape = Shapes.medium // or RoundedCornerShape(desiredRadius)
+                ) 
         )
 
         // Offset for game elements to start drawing *after* the border and *after* innerContentPadding

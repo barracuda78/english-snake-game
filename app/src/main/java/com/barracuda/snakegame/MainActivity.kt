@@ -1,6 +1,7 @@
 package com.barracuda.snakegame
 
 import android.content.Context
+import androidx.compose.foundation.background
 import android.media.AudioAttributes
 import android.media.SoundPool
 import android.os.Bundle
@@ -21,7 +22,9 @@ import androidx.compose.runtime.remember // Added for remembering activity insta
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue // Added for 'by' delegate with collectAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color // Added for food color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp // Added for score text size
@@ -42,6 +45,12 @@ import android.util.Log // Added for logging
 // import java.util.* // Prefer Kotlin's Random
 import kotlin.random.Random // Explicit import for clarity
 
+// Define the gradient brush to be used by buttons
+private val diagonalGradientBrush = Brush.linearGradient(
+    colors = listOf(Color(0xFF00ffee), Color(0xFF1a00ff)),
+    start = Offset(0f, Float.POSITIVE_INFINITY), // Bottom-left
+    end = Offset(Float.POSITIVE_INFINITY, 0f)    // Top-right
+)
 // Define SnakeSegment data class
 data class SnakeSegment(val position: Pair<Int, Int>, val color: Color)
 
@@ -335,12 +344,7 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
         const val BASE_DELAY_MS = 200L         // Delay at initial length (milliseconds)
         const val MIN_DELAY_MS = 50L           // Minimum delay (fastest speed)
         const val DELAY_DECREASE_PER_FOOD_MS = 5L // How much delay decreases per food item
-        private val INITIAL_SNAKE_COLORS = listOf(
-            DarkGreen, // From ui.theme
-            Color.Red,
-            Color.Yellow,
-            Color.White
-        )
+        private val INITIAL_SNAKE_COLORS = listOf(Color(0xFF00ffee)) // Snake starts with this teal/cyan color
         private const val SNAKE_GAME_PREFS = "SnakeGamePrefs"
         private const val HIGH_SCORE_KEY = "HighScore"
     }
@@ -382,11 +386,23 @@ fun Snake(game: Game) {
             }
             Button(
                 onClick = { game.togglePause() },
-                modifier = Modifier.padding(top = 16.dp),
+                modifier = Modifier.padding(top = 16.dp).fillMaxWidth(0.5f).height(48.dp),
                 shape = RoundedCornerShape(12.dp),
-                elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp)
+                elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = Color.Transparent, // Make button background transparent
+                    contentColor = Color.White
+                ),
+                contentPadding = PaddingValues(0.dp) // Remove default padding
             ) {
-                Text(if (isPaused) "Resume" else "Pause")
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(if (isPaused) "Resume" else "Pause")
+                }
             }
         }
     }
@@ -404,12 +420,46 @@ fun GameOverScreen(finalScore: Int, highScore: Int, onRestart: () -> Unit, onExi
         Text("Your Score: $finalScore", fontSize = 24.sp)
         Text("High Score: $highScore", fontSize = 20.sp)
         Spacer(modifier = Modifier.height(32.dp))
-        Button(onClick = onRestart, modifier = Modifier.fillMaxWidth(0.6f)) {
-            Text("Restart")
+        Button(
+            onClick = onRestart,
+            modifier = Modifier.fillMaxWidth(0.6f).height(48.dp),
+            shape = RoundedCornerShape(12.dp), // Added for consistency
+            elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp), // Added for consistency
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Transparent,
+                contentColor = Color.White
+            ),
+            contentPadding = PaddingValues(0.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("Restart")
+            }
         }
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = onExit, modifier = Modifier.fillMaxWidth(0.6f)) {
-            Text("Exit")
+        Button(
+            onClick = onExit,
+            modifier = Modifier.fillMaxWidth(0.6f).height(48.dp),
+            shape = RoundedCornerShape(12.dp), // Added for consistency
+            elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp), // Added for consistency
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Transparent,
+                contentColor = Color.White
+            ),
+            contentPadding = PaddingValues(0.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("Exit")
+            }
         }
     }
 }
@@ -422,31 +472,84 @@ fun Buttons(onDirectionChange: (Pair<Int, Int>) -> Unit) {
             onClick = { onDirectionChange(Pair(0, -1)) },
             modifier = buttonSize,
             shape = RoundedCornerShape(12.dp),
-            elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp)
+            elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Transparent,
+                contentColor = Color.White
+            ),
+            contentPadding = PaddingValues(0.dp)
         ) {
-            Icon(Icons.Default.KeyboardArrowUp, null)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Default.KeyboardArrowUp, null)
+            }
         }
         Row {
             Button(
                 onClick = { onDirectionChange(Pair(-1, 0)) },
                 modifier = buttonSize,
                 shape = RoundedCornerShape(12.dp),
-                elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp)
+                elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = Color.Transparent,
+                    contentColor = Color.White
+                ),
+                contentPadding = PaddingValues(0.dp)
             ) {
-                Icon(Icons.Default.KeyboardArrowLeft, null)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Default.KeyboardArrowLeft, null)
+                }
             }
             Spacer(modifier = buttonSize)
             Button(
                 onClick = { onDirectionChange(Pair(1, 0)) },
                 modifier = buttonSize,
                 shape = RoundedCornerShape(12.dp),
-                elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp)
+                elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = Color.Transparent,
+                    contentColor = Color.White
+                ),
+                contentPadding = PaddingValues(0.dp)
             ) {
-                Icon(Icons.Default.KeyboardArrowRight, null)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Default.KeyboardArrowRight, null)
+                }
             }
         }
-        Button(onClick = { onDirectionChange(Pair(0, 1)) }, modifier = buttonSize, shape = RoundedCornerShape(12.dp), elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp)) {
-            Icon(Icons.Default.KeyboardArrowDown, null)
+        Button(
+            onClick = { onDirectionChange(Pair(0, 1)) },
+            modifier = buttonSize,
+            shape = RoundedCornerShape(12.dp),
+            elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Transparent,
+                contentColor = Color.White
+            ),
+            contentPadding = PaddingValues(0.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Default.KeyboardArrowDown, null)
+            }
         }
     }
 }
