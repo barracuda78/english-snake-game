@@ -52,13 +52,14 @@ fun Board(state: State) {
             fontWeight = FontWeight.Bold
         )
 
-        state.snake.forEach {
+        state.snake.forEach { segment -> // 'it' is now a SnakeSegment
             Box(
                 modifier = Modifier
-                    .offset(x = tileSize * it.first, y = tileSize * it.second)
+                    .offset(x = tileSize * segment.position.first, y = tileSize * segment.position.second)
                     .size(tileSize)
                     .background(
-                        DarkGreen, Shapes.small
+                        color = segment.color, // Use the segment's specific color
+                        shape = Shapes.small
                     )
             )
         }
