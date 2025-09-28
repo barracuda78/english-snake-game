@@ -97,7 +97,7 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
 
     private val foodColors: List<Color> = listOf(
         Color.Red,
-        Color(0xFF007BFF), // Bright Blue
+        Color(0xFF00FF00), // Bright Green (replaces Bright Blue)
         Color.Yellow,
         Color.Magenta,
         Color.White,
