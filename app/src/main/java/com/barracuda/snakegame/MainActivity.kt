@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.shape.RoundedCornerShape // Added for button shapes
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.ButtonDefaults // Added for button elevation
@@ -21,6 +22,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember // Added for remembering activity instance
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue // Added for 'by' delegate with collectAsState
+import androidx.compose.runtime.mutableStateOf // Added for AlertDialog state
+import androidx.compose.runtime.setValue // Added for AlertDialog state
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.Modifier
@@ -377,9 +380,6 @@ fun Snake(game: Game) {
     val isPaused by game.isPaused.collectAsState()
     val isGameActive by game.isGameActive.collectAsState()
 
-    // Get activity context for finishing the app (though not used directly for exit now)
-    // val activity = (LocalContext.current as? ComponentActivity)
-
     when {
         !isGameActive && !gameState.isGameOver -> {
             StartMenuScreen(onStartClick = { game.startGame() })
@@ -438,6 +438,9 @@ fun Snake(game: Game) {
 
 @Composable
 fun StartMenuScreen(onStartClick: () -> Unit) {
+    var showInfoDialog by remember { mutableStateOf(false) }
+    val activity = (LocalContext.current as? ComponentActivity)
+
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.Center,
@@ -465,6 +468,83 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
                 Text("Start", fontSize = 20.sp)
             }
         }
+        Spacer(modifier = Modifier.height(16.dp)) 
+        Button(
+            onClick = { showInfoDialog = true },
+            modifier = Modifier.fillMaxWidth(0.6f).height(48.dp),
+            shape = RoundedCornerShape(12.dp),
+            elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Transparent,
+                contentColor = Color.White
+            ),
+            contentPadding = PaddingValues(0.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("Info", fontSize = 20.sp)
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp)) // Spacer between Info and Exit buttons
+        Button(
+            onClick = { activity?.finish() },
+            modifier = Modifier.fillMaxWidth(0.6f).height(48.dp),
+            shape = RoundedCornerShape(12.dp),
+            elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Transparent,
+                contentColor = Color.White
+            ),
+            contentPadding = PaddingValues(0.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("Exit", fontSize = 20.sp)
+            }
+        }
+    }
+
+    if (showInfoDialog) {
+        AlertDialog(
+            onDismissRequest = { showInfoDialog = false },
+            title = {
+                Text("Game Information", fontWeight = FontWeight.Bold)
+            },
+            text = {
+                Text("ABC Snake game. Version 0.1.13. Created by Andrei Ruzaev. Copyright 2025")
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showInfoDialog = false },
+                    modifier = Modifier.fillMaxWidth(0.8f).height(48.dp), 
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color.Transparent,
+                        contentColor = Color.White
+                    ),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("OK")
+                    }
+                }
+            },
+            shape = RoundedCornerShape(16.dp) 
+        )
     }
 }
 
