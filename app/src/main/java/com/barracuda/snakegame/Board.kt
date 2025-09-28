@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape // Added for rounded corners
 import androidx.compose.runtime.Composable
 import androidx.compose.material.Text // Added for food letter
 import androidx.compose.ui.Modifier
@@ -23,7 +24,7 @@ import com.barracuda.snakegame.ui.theme.Shapes
 @Composable
 fun Board(state: State) {
     BoxWithConstraints(Modifier.padding(2.dp)) { // This outer padding is for the component itself
-        val borderThickness = 2.dp
+        val borderThickness = 1.dp // Changed from 2.dp to 1.dp
         val innerContentPadding = 1.dp // New visual gap inside the border
 
         // Total available width/height for the bordered box and its content
@@ -53,9 +54,8 @@ fun Board(state: State) {
                                 Color(0xFF557eaa)
                             )
                         )
-                    )
-                    // If you want a specific shape for the border, like rounded corners:
-                    // , shape = Shapes.medium // or RoundedCornerShape(desiredRadius)
+                    ),
+                    shape = RoundedCornerShape(4.dp) // Added rounded corners
                 ) 
         )
 
@@ -94,7 +94,7 @@ fun Board(state: State) {
                     .size(tileSize)
                     .background(
                         color = segment.color, // Use the segment's specific color
-                        shape = Shapes.small
+                        shape = Shapes.small // This uses your custom Shapes.kt for snake segments
                     )
             )
         }

@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color // Added for food color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp // Added for score text size
 import androidx.compose.ui.platform.LocalContext // Added for accessing activity context
 import androidx.compose.ui.unit.dp
@@ -516,34 +517,47 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
         AlertDialog(
             onDismissRequest = { showInfoDialog = false },
             title = {
-                Text("Game Information", fontWeight = FontWeight.Bold)
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Text("Game Information", fontWeight = FontWeight.Bold, color = MaterialTheme.colors.primary)
+                }
             },
             text = {
-                Text("ABC Snake game. Version 0.1.13. Created by Andrei Ruzaev. Copyright 2025")
+                Text(
+                    "ABC Snake game. Version 0.1.13. Created by Andrei Ruzaev. Copyright 2025",
+                    color = MaterialTheme.colors.onBackground, // Explicitly set for clarity
+                    textAlign = TextAlign.Center, // Center align the body text as well
+                    modifier = Modifier.fillMaxWidth()
+                )
             },
             confirmButton = {
-                Button(
-                    onClick = { showInfoDialog = false },
-                    modifier = Modifier.fillMaxWidth(0.8f).height(48.dp), 
-                    shape = RoundedCornerShape(12.dp),
-                    elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Color.Transparent,
-                        contentColor = Color.White
-                    ),
-                    contentPadding = PaddingValues(0.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp, start = 8.dp, end = 8.dp),
+                    horizontalArrangement = Arrangement.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
-                        contentAlignment = Alignment.Center
+                    Button(
+                        onClick = { showInfoDialog = false },
+                        modifier = Modifier.fillMaxWidth(0.6f).height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = Color.Transparent,
+                            contentColor = Color.White
+                        ),
+                        contentPadding = PaddingValues(0.dp)
                     ) {
-                        Text("OK")
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("OK")
+                        }
                     }
                 }
             },
-            shape = RoundedCornerShape(16.dp) 
+            shape = RoundedCornerShape(16.dp),
+            backgroundColor = MaterialTheme.colors.background // Set dialog background color
         )
     }
 }
