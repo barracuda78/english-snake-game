@@ -72,7 +72,8 @@ data class State(
     val distractorLetterColor: Color,
     val snake: List<SnakeSegment>, // Changed from List<Pair<Int, Int>>
     val score: Int, // Added score
-    val eatenLetters: Set<Char> = emptySet() // Added to track eaten target letters
+    val eatenLetters: Set<Char> = emptySet(), // Added to track eaten target letters
+    val highScore: Int = 0 // Added for high score display
 )
 
 class Game(private val scope: CoroutineScope, private val context: Context) {
@@ -95,6 +96,7 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
     private val mutableIsPaused = MutableStateFlow(false)
     val isPaused: StateFlow<Boolean> = mutableIsPaused
 
+    private var highScore: Int = 0
     private val mutex = Mutex()
 
     // Helper to generate a random letter, optionally excluding one
@@ -120,6 +122,16 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
         return position
     }
 
+    private fun checkAndSaveHighScore(currentScore: Int) {
+        if (currentScore > highScore) {
+            highScore = currentScore
+            val prefs = context.getSharedPreferences(SNAKE_GAME_PREFS, Context.MODE_PRIVATE)
+            with(prefs.edit()) {
+                putInt(HIGH_SCORE_KEY, highScore)
+                apply()
+            }
+        }
+    }
     private fun createInitialGameState(): State {
         val initialSnakeBodySegments = mutableListOf<SnakeSegment>()
         val headStartPos = Pair(7, 7) // Assuming initial move is to the right (1,0)
@@ -148,7 +160,8 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
             distractorLetterColor = initialDistractorLetterColor,
             snake = initialSnakeBodySegments,
             score = 0, // Initialize score
-            eatenLetters = emptySet() // Explicitly initialize, though default works
+            eatenLetters = emptySet(), // Explicitly initialize, though default works
+            highScore = this.highScore // Initialize with current high score from Game class
         )
     }
 
@@ -192,6 +205,10 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
 
     init {
         loadSounds() // Load sounds when Game is initialized
+        // Load high score
+        val prefs = context.getSharedPreferences(SNAKE_GAME_PREFS, Context.MODE_PRIVATE)
+        highScore = prefs.getInt(HIGH_SCORE_KEY, 0)
+        mutableState.value = createInitialGameState() // Re-initialize state with loaded high score
 
         scope.launch {
             var snakeLength = INITIAL_SNAKE_LENGTH
@@ -265,6 +282,7 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
                             generateRandomSafePosition(nextSnakeBody, currentState.targetLetterPosition)
 
                     } else if (currentState.snake.any { it.position == newHeadPosition }) { // Self-collision check
+                        checkAndSaveHighScore(currentScore) // Save score before resetting
                         snakeLength = INITIAL_SNAKE_LENGTH // Reset outer loop variable
                         return@update createInitialGameState() // Return a completely new state
                     } else { // Normal move
@@ -284,7 +302,8 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
                         distractorLetterColor = nextDistractorLetterColor,
                         snake = nextSnakeBody,
                         score = newScore,
-                        eatenLetters = updatedEatenLetters
+                        eatenLetters = updatedEatenLetters,
+                        highScore = currentState.highScore // Keep displaying the high score from current state
                     )
                 }
             }
@@ -303,6 +322,8 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
             Color.Yellow,
             Color.White
         )
+        private const val SNAKE_GAME_PREFS = "SnakeGamePrefs"
+        private const val HIGH_SCORE_KEY = "HighScore"
     }
 }
 
@@ -316,9 +337,10 @@ fun Snake(game: Game) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.End
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp), // Increased padding
+            horizontalArrangement = Arrangement.SpaceBetween // To space out Score and High Score
         ) {
+            Text(text = "High: ${gameState.highScore}", fontSize = 20.sp)
             Text(text = "Score: ${gameState.score}", fontSize = 20.sp)
         }
         Board(gameState) // This will call the Board function from Board.kt
