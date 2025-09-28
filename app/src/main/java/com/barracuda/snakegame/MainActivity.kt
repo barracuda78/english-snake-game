@@ -6,9 +6,11 @@ import android.media.SoundPool
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.shape.RoundedCornerShape // Added for button shapes
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
+import androidx.compose.material.ButtonDefaults // Added for button elevation
 import androidx.compose.material.Text // Added import
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -20,6 +22,7 @@ import androidx.compose.runtime.getValue // Added for 'by' delegate with collect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color // Added for food color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp // Added for score text size
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
@@ -65,7 +68,8 @@ data class State(
     val distractorLetter: Char,
     val distractorLetterColor: Color,
     val snake: List<Pair<Int, Int>>,
-    val score: Int // Added score
+    val score: Int, // Added score
+    val eatenLetters: Set<Char> = emptySet() // Added to track eaten target letters
 )
 
 class Game(private val scope: CoroutineScope, private val context: Context) {
@@ -129,7 +133,8 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
             distractorLetter = initialDistractorLetter,
             distractorLetterColor = initialDistractorLetterColor,
             snake = initialSnakeBody,
-            score = 0 // Initialize score
+            score = 0, // Initialize score
+            eatenLetters = emptySet() // Explicitly initialize, though default works
         )
     }
 
@@ -207,6 +212,7 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
                     var nextDistractorLetterColor = currentState.distractorLetterColor
                     var nextDistractorLetterPosition = currentState.distractorLetterPosition
                     var newScore = currentScore
+                    var updatedEatenLetters = currentState.eatenLetters
 
                     // Tentative next snake state based on current length, before checking collisions/eating
                     val potentialNextSnake = listOf(newHeadPosition) + currentState.snake.take(snakeLength - 1)
@@ -215,6 +221,7 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
                         snakeLength++
                         newScore += 5
                         playSound(correctEatSoundId)
+                        updatedEatenLetters = currentState.eatenLetters + currentState.targetLetter
                         // Snake grows, use its new full length for safe position generation
                         val grownSnake = listOf(newHeadPosition) + currentState.snake.take(snakeLength - 1)
 
@@ -240,6 +247,7 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
                     } else if (currentState.snake.contains(newHeadPosition)) { // Self-collision
                         snakeLength = INITIAL_SNAKE_LENGTH
                         newScore = 0 // Reset score on collision
+                        updatedEatenLetters = emptySet() // Reset eaten letters
                         // Regenerate both food items to avoid spawning on them after reset
                         val resetSnake = listOf(newHeadPosition) + emptyList<Pair<Int,Int>>().take(snakeLength -1) // Simplified initial snake for placement
 
@@ -263,7 +271,8 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
                         distractorLetter = nextDistractorLetter,
                         distractorLetterColor = nextDistractorLetterColor,
                         snake = listOf(newHeadPosition) + currentState.snake.take(snakeLength - 1),
-                        score = newScore
+                        score = newScore,
+                        eatenLetters = updatedEatenLetters
                     )
                 }
             }
@@ -295,12 +304,16 @@ fun Snake(game: Game) {
             Text(text = "Score: ${gameState.score}", fontSize = 20.sp)
         }
         Board(gameState) // This will call the Board function from Board.kt
+        AlphabetDisplay(eatenLetters = gameState.eatenLetters) // Added Alphabet display
         Buttons {
             game.move = it
         }
+
         Button(
             onClick = { game.togglePause() },
-            modifier = Modifier.padding(top = 16.dp) // Add some spacing
+            modifier = Modifier.padding(top = 16.dp), // Add some spacing
+            shape = RoundedCornerShape(12.dp),
+            elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp)
         ) {
             Text(if (isPaused) "Resume" else "Pause")
         }
@@ -312,19 +325,34 @@ fun Snake(game: Game) {
 fun Buttons(onDirectionChange: (Pair<Int, Int>) -> Unit) {
     val buttonSize = Modifier.size(64.dp)
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(24.dp)) {
-        Button(onClick = { onDirectionChange(Pair(0, -1)) }, modifier = buttonSize) {
+        Button(
+            onClick = { onDirectionChange(Pair(0, -1)) },
+            modifier = buttonSize,
+            shape = RoundedCornerShape(12.dp),
+            elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp)
+        ) {
             Icon(Icons.Default.KeyboardArrowUp, null)
         }
         Row {
-            Button(onClick = { onDirectionChange(Pair(-1, 0)) }, modifier = buttonSize) {
+            Button(
+                onClick = { onDirectionChange(Pair(-1, 0)) },
+                modifier = buttonSize,
+                shape = RoundedCornerShape(12.dp),
+                elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp)
+            ) {
                 Icon(Icons.Default.KeyboardArrowLeft, null)
             }
             Spacer(modifier = buttonSize)
-            Button(onClick = { onDirectionChange(Pair(1, 0)) }, modifier = buttonSize) {
+            Button(
+                onClick = { onDirectionChange(Pair(1, 0)) },
+                modifier = buttonSize,
+                shape = RoundedCornerShape(12.dp),
+                elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp)
+            ) {
                 Icon(Icons.Default.KeyboardArrowRight, null)
             }
         }
-        Button(onClick = { onDirectionChange(Pair(0, 1)) }, modifier = buttonSize) {
+        Button(onClick = { onDirectionChange(Pair(0, 1)) }, modifier = buttonSize, shape = RoundedCornerShape(12.dp), elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp)) {
             Icon(Icons.Default.KeyboardArrowDown, null)
         }
     }
@@ -333,3 +361,31 @@ fun Buttons(onDirectionChange: (Pair<Int, Int>) -> Unit) {
 // Board composable is now in Board.kt
 // @Composable
 // fun Board(state: State) { ... }
+
+@Composable
+fun AlphabetDisplay(eatenLetters: Set<Char>) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .heightIn(min = 20.dp), // Ensure the Row has some height even if empty
+        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally) // Center group, space letters
+    ) {
+        val sortedEatenUppercase = eatenLetters.map { it.uppercaseChar() }.sorted()
+
+        if (sortedEatenUppercase.isEmpty()) {
+            // Optionally, display a placeholder or leave empty. 
+            // Adding a Text with an empty string or a specific placeholder if desired.
+            // For now, it will just be an empty Row that takes up minimal space due to heightIn.
+        } else {
+            for (letterToShow in sortedEatenUppercase) {
+                Text(
+                    text = letterToShow.toString(),
+                    color = MaterialTheme.colors.primary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp // Can be a bit larger now
+                )
+            }
+        }
+    }
+}
