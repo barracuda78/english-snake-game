@@ -68,7 +68,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    Snake(game)
+                    Snake(game) // This will now handle showing StartMenu or Game or GameOver
                 }
             }
         }
@@ -109,6 +109,9 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
 
     private val mutableIsPaused = MutableStateFlow(false)
     val isPaused: StateFlow<Boolean> = mutableIsPaused
+
+    private val mutableIsGameActive = MutableStateFlow(false)
+    val isGameActive: StateFlow<Boolean> = mutableIsGameActive
 
     private var highScore: Int = 0
     private val mutex = Mutex()
@@ -196,9 +199,20 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
         mutableIsPaused.value = !mutableIsPaused.value
     }
 
+    fun startGame() {
+        mutableIsGameActive.value = true
+        mutableIsPaused.value = false
+        mutableState.value = createInitialGameState() // Reset game to initial state
+        move = Pair(1,0) // Reset move direction
+    }
+
     fun restartGame() {
-        mutableIsPaused.value = false // Ensure game is not paused on restart
-        mutableState.value = createInitialGameState()
+        startGame() // Restarting is essentially starting the game again
+    }
+
+    fun returnToMenu() {
+        mutableIsGameActive.value = false
+        mutableState.update { it.copy(isGameOver = false) } // Ensure game over is reset for menu
     }
 
     private fun loadSounds() {
@@ -229,25 +243,30 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
         // Load high score
         val prefs = context.getSharedPreferences(SNAKE_GAME_PREFS, Context.MODE_PRIVATE)
         highScore = prefs.getInt(HIGH_SCORE_KEY, 0)
-        mutableState.value = createInitialGameState() // Re-initialize state with loaded high score
+        mutableState.value = createInitialGameState() // Initialize state with loaded high score
 
         scope.launch {
             var snakeLength = INITIAL_SNAKE_LENGTH
             var currentScore = 0 // Local score tracking within the game loop
 
-            gameLoop@ while (true) { // Added label for breaking out if needed
+            gameLoop@ while (true) {
+                if (!isGameActive.value) { // If game is not active (e.g., at start menu)
+                    delay(100L) // Idle delay
+                    continue@gameLoop
+                }
+
                 if (mutableIsPaused.value) {
                     delay(100L) // Small delay to prevent a busy loop while paused
-                    continue
+                    continue@gameLoop
                 }
-                // val foodEaten = snakeLength - INITIAL_SNAKE_LENGTH // Not strictly needed for delay if simplified
-                val foodEaten = snakeLength - INITIAL_SNAKE_LENGTH //Re-added this line, because it is used below.
+                
+                val foodEaten = snakeLength - INITIAL_SNAKE_LENGTH 
                 val currentDelay = BASE_DELAY_MS - (foodEaten * DELAY_DECREASE_PER_FOOD_MS)
                 val actualDelay = currentDelay.coerceAtLeast(MIN_DELAY_MS)
 
                 delay(actualDelay)
-                mutableState.update { currentState -> // currentState.snake is List<SnakeSegment>
-                    if (currentState.isGameOver) { // Don't update game logic if game is over
+                mutableState.update { currentState -> 
+                    if (currentState.isGameOver) { 
                         return@update currentState
                     }
 
@@ -299,7 +318,7 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
                         newHeadColor = currentState.distractorLetterColor
                         
                         val newHeadSegment = SnakeSegment(newHeadPosition, newHeadColor)
-                        nextSnakeBody = listOf(newHeadSegment) + currentState.snake.take(snakeLength - 1) // Length doesn't change, last element effectively dropped
+                        nextSnakeBody = listOf(newHeadSegment) + currentState.snake.take(snakeLength - 1) 
                         
                         nextDistractorLetter = generateRandomLetter(exclude = currentState.targetLetter)
                         nextDistractorLetterColor = foodColors.random(random)
@@ -307,20 +326,21 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
                             generateRandomSafePosition(nextSnakeBody, currentState.targetLetterPosition)
 
                     } else if (currentState.snake.any { it.position == newHeadPosition }) { // Self-collision check
-                        checkAndSaveHighScore(currentScore) // Save score
-                        playSound(gameOverSoundId) // Play game over sound
-                        snakeLength = INITIAL_SNAKE_LENGTH // Reset local variable for next game
+                        checkAndSaveHighScore(currentScore) 
+                        playSound(gameOverSoundId) 
+                        mutableIsGameActive.value = false // Game is no longer active
+                        snakeLength = INITIAL_SNAKE_LENGTH 
                         return@update currentState.copy(
                             isGameOver = true,
-                            highScore = this@Game.highScore // Ensure high score is updated in the state
+                            highScore = this@Game.highScore 
                         )
                     } else { // Normal move
-                        newHeadColor = currentState.snake.first().color // Inherit color from old head
+                        newHeadColor = currentState.snake.first().color 
                         val newHeadSegment = SnakeSegment(newHeadPosition, newHeadColor)
                         nextSnakeBody = listOf(newHeadSegment) + currentState.snake.take(snakeLength - 1)
                     }
 
-                    currentScore = newScore // Update local score tracker
+                    currentScore = newScore 
 
                     currentState.copy(
                         targetLetterPosition = nextTargetLetterPosition,
@@ -332,7 +352,7 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
                         snake = nextSnakeBody,
                         score = newScore,
                         eatenLetters = updatedEatenLetters,
-                        highScore = currentState.highScore // Keep displaying the high score from current state
+                        highScore = currentState.highScore 
                     )
                 }
             }
@@ -341,11 +361,11 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
 
     companion object {
         const val BOARD_SIZE = 32
-        const val INITIAL_SNAKE_LENGTH = 4     // Starting length of the snake
-        const val BASE_DELAY_MS = 200L         // Delay at initial length (milliseconds)
-        const val MIN_DELAY_MS = 50L           // Minimum delay (fastest speed)
-        const val DELAY_DECREASE_PER_FOOD_MS = 5L // How much delay decreases per food item
-        private val INITIAL_SNAKE_COLORS = listOf(Color(0xFF00ffee)) // Snake starts with this teal/cyan color
+        const val INITIAL_SNAKE_LENGTH = 4     
+        const val BASE_DELAY_MS = 200L         
+        const val MIN_DELAY_MS = 50L           
+        const val DELAY_DECREASE_PER_FOOD_MS = 5L 
+        private val INITIAL_SNAKE_COLORS = listOf(Color(0xFF00ffee)) 
         private const val SNAKE_GAME_PREFS = "SnakeGamePrefs"
         private const val HIGH_SCORE_KEY = "HighScore"
     }
@@ -354,56 +374,95 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
 @Composable
 fun Snake(game: Game) {
     val gameState by game.state.collectAsState()
-    val isPaused by game.isPaused.collectAsState() // Still needed for Pause button text
+    val isPaused by game.isPaused.collectAsState()
+    val isGameActive by game.isGameActive.collectAsState()
 
-    // Get activity context for finishing the app
-    val activity = (LocalContext.current as? ComponentActivity)
+    // Get activity context for finishing the app (though not used directly for exit now)
+    // val activity = (LocalContext.current as? ComponentActivity)
 
-    if (gameState.isGameOver) {
-        GameOverScreen(
-            finalScore = gameState.score,
-            highScore = gameState.highScore,
-            onRestart = { game.restartGame() },
-            onExit = { activity?.finish() }
-        )
-    } else {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+    when {
+        !isGameActive && !gameState.isGameOver -> {
+            StartMenuScreen(onStartClick = { game.startGame() })
+        }
+        isGameActive && !gameState.isGameOver -> {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "High: ${gameState.highScore}", fontSize = 20.sp)
-                Text(text = "Score: ${gameState.score}", fontSize = 20.sp)
-            }
-            Board(gameState)
-            AlphabetDisplay(eatenLetters = gameState.eatenLetters)
-            Buttons { direction ->
-                if (!isPaused) { // Only allow direction changes if not paused
-                    game.move = direction
-                }
-            }
-            Button(
-                onClick = { game.togglePause() },
-                modifier = Modifier.padding(top = 16.dp).fillMaxWidth(0.5f).height(48.dp),
-                shape = RoundedCornerShape(12.dp),
-                elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Color.Transparent, // Make button background transparent
-                    contentColor = Color.White
-                ),
-                contentPadding = PaddingValues(0.dp) // Remove default padding
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
-                    contentAlignment = Alignment.Center
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(if (isPaused) "Resume" else "Pause")
+                    Text(text = "High: ${gameState.highScore}", fontSize = 20.sp)
+                    Text(text = "Score: ${gameState.score}", fontSize = 20.sp)
                 }
+                Board(gameState)
+                AlphabetDisplay(eatenLetters = gameState.eatenLetters)
+                Buttons { direction ->
+                    if (!isPaused) { 
+                        game.move = direction
+                    }
+                }
+                Button(
+                    onClick = { game.togglePause() },
+                    modifier = Modifier.padding(top = 16.dp).fillMaxWidth(0.5f).height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color.Transparent, 
+                        contentColor = Color.White
+                    ),
+                    contentPadding = PaddingValues(0.dp) 
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(if (isPaused) "Resume" else "Pause")
+                    }
+                }
+            }
+        }
+        gameState.isGameOver -> {
+            GameOverScreen(
+                finalScore = gameState.score,
+                highScore = gameState.highScore,
+                onRestart = { game.restartGame() },
+                onExit = { game.returnToMenu() } // Changed from activity?.finish()
+            )
+        }
+    }
+}
+
+@Composable
+fun StartMenuScreen(onStartClick: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Snake Game", fontSize = 40.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colors.primary)
+        Spacer(modifier = Modifier.height(64.dp))
+        Button(
+            onClick = onStartClick,
+            modifier = Modifier.fillMaxWidth(0.6f).height(48.dp),
+            shape = RoundedCornerShape(12.dp),
+            elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Transparent,
+                contentColor = Color.White
+            ),
+            contentPadding = PaddingValues(0.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("Start", fontSize = 20.sp)
             }
         }
     }
@@ -424,8 +483,8 @@ fun GameOverScreen(finalScore: Int, highScore: Int, onRestart: () -> Unit, onExi
         Button(
             onClick = onRestart,
             modifier = Modifier.fillMaxWidth(0.6f).height(48.dp),
-            shape = RoundedCornerShape(12.dp), // Added for consistency
-            elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp), // Added for consistency
+            shape = RoundedCornerShape(12.dp), 
+            elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp), 
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color.Transparent,
                 contentColor = Color.White
@@ -445,8 +504,8 @@ fun GameOverScreen(finalScore: Int, highScore: Int, onRestart: () -> Unit, onExi
         Button(
             onClick = onExit,
             modifier = Modifier.fillMaxWidth(0.6f).height(48.dp),
-            shape = RoundedCornerShape(12.dp), // Added for consistency
-            elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp), // Added for consistency
+            shape = RoundedCornerShape(12.dp), 
+            elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp), 
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color.Transparent,
                 contentColor = Color.White
@@ -459,7 +518,7 @@ fun GameOverScreen(finalScore: Int, highScore: Int, onRestart: () -> Unit, onExi
                     .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Exit")
+                Text("Exit to Menu") // Changed text for clarity
             }
         }
     }
