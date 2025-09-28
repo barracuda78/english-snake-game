@@ -45,9 +45,12 @@ fun Board(state: State) {
                         borderThickness,
                         Brush.linearGradient(
                             colors = listOf(
-                                Color(0xFF00ffee),
-                                Color(0xFF00e5ff),
-                                Color(0xFF00ffee)
+//                                Color(0xFF00ffee),
+//                                Color(0xFF00e5ff),
+//                                Color(0xFF00ffee)
+                                Color(0xFF557eaa),
+                                Color(0xFF337dcc),
+                                Color(0xFF557eaa)
                             )
                         )
                     )

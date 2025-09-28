@@ -47,7 +47,8 @@ import kotlin.random.Random // Explicit import for clarity
 
 // Define the gradient brush to be used by buttons
 private val diagonalGradientBrush = Brush.linearGradient(
-    colors = listOf(Color(0xFF00ffee), Color(0xFF1a00ff)),
+//    colors = listOf(Color(0xFF00ffee), Color(0xFF00fbff)),
+    colors = listOf(Color(0xFF557eaa), Color(0xFF337dcc)),
     start = Offset(0f, Float.POSITIVE_INFINITY), // Bottom-left
     end = Offset(Float.POSITIVE_INFINITY, 0f)    // Top-right
 )
