@@ -29,6 +29,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color // Added for food color
+import androidx.compose.ui.input.pointer.pointerInput // Added for PausedOverlay
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp // Added for score text size
@@ -398,7 +399,15 @@ fun Snake(game: Game) {
                     Text(text = "High score: ${gameState.highScore}", fontSize = 20.sp, color = Color.White)
                     Text(text = "Score: ${gameState.score}", fontSize = 20.sp, color = Color.White)
                 }
-                Board(gameState)
+                
+                Box(
+                    modifier = Modifier.fillMaxWidth().aspectRatio(1f), // Added modifier
+                    contentAlignment = Alignment.Center
+                ) {
+                    Board(gameState)
+                    PausedOverlay(isVisible = isPaused)
+                }
+
                 AlphabetDisplay(eatenLetterColors = gameState.eatenLetterColors) // Pass the map
                 Buttons { direction ->
                     if (!isPaused) { 
@@ -433,6 +442,26 @@ fun Snake(game: Game) {
                 highScore = gameState.highScore,
                 onRestart = { game.restartGame() },
                 onExit = { game.returnToMenu() } // Changed from activity?.finish()
+            )
+        }
+    }
+}
+
+@Composable
+fun PausedOverlay(isVisible: Boolean) {
+    if (isVisible) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.7f))
+                .pointerInput(Unit) {}, // Consume touch events when paused to prevent interaction with underlying elements
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "PAUSED",
+                color = Color.White,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold
             )
         }
     }
