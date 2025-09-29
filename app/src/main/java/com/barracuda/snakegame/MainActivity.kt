@@ -51,7 +51,6 @@ import kotlin.random.Random // Explicit import for clarity
 
 // Define the gradient brush to be used by buttons
 private val diagonalGradientBrush = Brush.linearGradient(
-//    colors = listOf(Color(0xFF00ffee), Color(0xFF00fbff)),
     colors = listOf(Color(0xFF557eaa), Color(0xFF337dcc)),
     start = Offset(0f, Float.POSITIVE_INFINITY), // Bottom-left
     end = Offset(Float.POSITIVE_INFINITY, 0f)    // Top-right
@@ -88,7 +87,7 @@ data class State(
     val distractorLetterColor: Color,
     val snake: List<SnakeSegment>, // Changed from List<Pair<Int, Int>>
     val score: Int, // Added score
-    val eatenLetters: Set<Char> = emptySet(), // Added to track eaten target letters
+    val eatenLetterColors: Map<Char, Color> = emptyMap(), // Changed from eatenLetters: Set<Char>
     val highScore: Int = 0, // Added for high score display
     val isGameOver: Boolean = false // Added for game over state
 )
@@ -181,7 +180,7 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
             distractorLetterColor = initialDistractorLetterColor,
             snake = initialSnakeBodySegments,
             score = 0, // Initialize score
-            eatenLetters = emptySet(), // Explicitly initialize, though default works
+            eatenLetterColors = emptyMap(), // Initialize as empty map
             highScore = this.highScore, // Initialize with current high score from Game class
             isGameOver = false // Ensure game starts not over
         )
@@ -291,7 +290,7 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
                     var nextDistractorLetterColor = currentState.distractorLetterColor
                     var nextDistractorLetterPosition = currentState.distractorLetterPosition
                     var newScore = currentScore
-                    var updatedEatenLetters = currentState.eatenLetters
+                    var updatedEatenLetterColors = currentState.eatenLetterColors // Changed from updatedEatenLetters
                     
                     var newHeadColor: Color
                     var nextSnakeBody: List<SnakeSegment>
@@ -300,7 +299,9 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
                         snakeLength++
                         newScore += 5
                         playSound(correctEatSoundId)
-                        updatedEatenLetters = currentState.eatenLetters + currentState.targetLetter
+                        // Add the eaten letter and its color to the map
+                        updatedEatenLetterColors = currentState.eatenLetterColors + 
+                                (currentState.targetLetter to currentState.targetLetterColor)
                         newHeadColor = currentState.targetLetterColor
 
                         val newHeadSegment = SnakeSegment(newHeadPosition, newHeadColor)
@@ -355,7 +356,7 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
                         distractorLetterColor = nextDistractorLetterColor,
                         snake = nextSnakeBody,
                         score = newScore,
-                        eatenLetters = updatedEatenLetters,
+                        eatenLetterColors = updatedEatenLetterColors, // Pass the updated map
                         highScore = currentState.highScore 
                     )
                 }
@@ -394,11 +395,11 @@ fun Snake(game: Game) {
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "High: ${gameState.highScore}", fontSize = 20.sp)
-                    Text(text = "Score: ${gameState.score}", fontSize = 20.sp)
+                    Text(text = "High score: ${gameState.highScore}", fontSize = 20.sp, color = Color.White)
+                    Text(text = "Score: ${gameState.score}", fontSize = 20.sp, color = Color.White)
                 }
                 Board(gameState)
-                AlphabetDisplay(eatenLetters = gameState.eatenLetters)
+                AlphabetDisplay(eatenLetterColors = gameState.eatenLetterColors) // Pass the map
                 Buttons { direction ->
                     if (!isPaused) { 
                         game.move = direction
@@ -447,7 +448,7 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Snake Game", fontSize = 40.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colors.primary)
+        Text("Snake Game", fontSize = 40.sp, fontWeight = FontWeight.Bold, color = Color.White)
         Spacer(modifier = Modifier.height(64.dp))
         Button(
             onClick = onStartClick,
@@ -518,13 +519,13 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
             onDismissRequest = { showInfoDialog = false },
             title = {
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    Text("Game Information", fontWeight = FontWeight.Bold, color = MaterialTheme.colors.primary)
+                    Text("Game Information", fontWeight = FontWeight.Bold, color = Color.White)
                 }
             },
             text = {
                 Text(
-                    "ABC Snake game. Version 0.1.13. Created by Andrei Ruzaev. Copyright 2025",
-                    color = MaterialTheme.colors.onBackground, // Explicitly set for clarity
+                    "ABC Snake game.\nVersion 0.1.13.\nCreated by Andrei Ruzaev.\nCopyright 2025",
+                    color = Color.White, // Explicitly set for clarity
                     textAlign = TextAlign.Center, // Center align the body text as well
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -679,7 +680,7 @@ fun Buttons(onDirectionChange: (Pair<Int, Int>) -> Unit) {
                     modifier = Modifier
                         .fillMaxSize()
                         .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
-                    contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center
                 ) {
                     Icon(Icons.Default.KeyboardArrowRight, null)
                 }
@@ -713,29 +714,23 @@ fun Buttons(onDirectionChange: (Pair<Int, Int>) -> Unit) {
 // fun Board(state: State) { ... }
 
 @Composable
-fun AlphabetDisplay(eatenLetters: Set<Char>) {
+fun AlphabetDisplay(eatenLetterColors: Map<Char, Color>) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .heightIn(min = 20.dp), // Ensure the Row has some height even if empty
-        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally) // Center group, space letters
+        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally)
     ) {
-        val sortedEatenUppercase = eatenLetters.map { it.uppercaseChar() }.sorted()
-
-        if (sortedEatenUppercase.isEmpty()) {
-            // Optionally, display a placeholder or leave empty. 
-            // Adding a Text with an empty string or a specific placeholder if desired.
-            // For now, it will just be an empty Row that takes up minimal space due to heightIn.
-        } else {
-            for (letterToShow in sortedEatenUppercase) {
-                Text(
-                    text = letterToShow.toString(),
-                    color = MaterialTheme.colors.primary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp // Can be a bit larger now
-                )
-            }
+        ('A'..'Z').forEach { char ->
+            val lowerChar = char.lowercaseChar()
+            val letterColor = eatenLetterColors[lowerChar] ?: Color.Transparent // Use food color or Transparent
+            Text(
+                text = char.toString(),
+                color = letterColor,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp
+            )
         }
     }
 }
