@@ -19,6 +19,8 @@ import androidx.compose.ui.unit.sp // For text size
 // import com.barracuda.snakegame.ui.theme.DarkGreen // No longer using DarkGreen from theme for border
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color // Import for custom color
+import com.barracuda.snakegame.game.Game
+import com.barracuda.snakegame.game.State
 import com.barracuda.snakegame.ui.theme.Shapes
 
 @Composable
