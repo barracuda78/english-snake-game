@@ -7,6 +7,11 @@ import android.util.Log
 import androidx.compose.ui.graphics.Color
 import com.barracuda.snakegame.R
 import com.barracuda.snakegame.ui.theme.*
+import com.barracuda.snakegame.util.GameConstants.BASE_DELAY_MS
+import com.barracuda.snakegame.util.GameConstants.BOARD_SIZE
+import com.barracuda.snakegame.util.GameConstants.DELAY_DECREASE_PER_FOOD_MS
+import com.barracuda.snakegame.util.GameConstants.INITIAL_SNAKE_LENGTH
+import com.barracuda.snakegame.util.GameConstants.MIN_DELAY_MS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -303,11 +308,6 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
     }
 
     companion object {
-        const val BOARD_SIZE = 32
-        const val INITIAL_SNAKE_LENGTH = 4
-        const val BASE_DELAY_MS = 200L
-        const val MIN_DELAY_MS = 50L
-        const val DELAY_DECREASE_PER_FOOD_MS = 5L
         private val INITIAL_SNAKE_COLORS = listOf(SnakeHeadColor)
         private const val SNAKE_GAME_PREFS = "SnakeGamePrefs"
         private const val HIGH_SCORE_KEY = "HighScore"

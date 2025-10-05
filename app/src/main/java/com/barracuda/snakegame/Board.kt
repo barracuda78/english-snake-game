@@ -14,20 +14,19 @@ import androidx.compose.material.Text // Added for food letter
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight // Added for bold text
 import androidx.compose.ui.text.style.TextAlign // Added for text alignment
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp // For text size
 import androidx.compose.ui.graphics.Brush
-import com.barracuda.snakegame.game.Game // Import Game to access BOARD_SIZE
 import com.barracuda.snakegame.game.State
 import com.barracuda.snakegame.ui.theme.ButtonGradient1
 import com.barracuda.snakegame.ui.theme.ButtonGradient2
 import com.barracuda.snakegame.ui.theme.Shapes
+import com.barracuda.snakegame.util.GameConstants
 
 @Composable
 fun Board(state: State) {
-    BoxWithConstraints(Modifier.padding(2.dp)) { // This outer padding is for the component itself
-        val borderThickness = 1.dp // Changed from 2.dp to 1.dp
-        val innerContentPadding = 1.dp // New visual gap inside the border
+    BoxWithConstraints(Modifier.padding(GameConstants.BoardPadding)) { // This outer padding is for the component itself
+        val borderThickness = GameConstants.BoardBorderThickness
+        val innerContentPadding = GameConstants.BoardInnerPadding
 
         // Total available width/height for the bordered box and its content
         val totalAvailableWidth = maxWidth
@@ -35,7 +34,7 @@ fun Board(state: State) {
         // The area where game elements will be drawn, inside border and inner padding
         val gameContentAreaWidth = totalAvailableWidth - (borderThickness * 2) - (innerContentPadding * 2)
 
-        val tileSize = gameContentAreaWidth / Game.BOARD_SIZE // Tile size based on the actual game content area
+        val tileSize = gameContentAreaWidth / GameConstants.BOARD_SIZE // Tile size based on the actual game content area
 
         // The Box that draws the border. It uses the full available width.
         Box(
@@ -52,7 +51,7 @@ fun Board(state: State) {
                             )
                         )
                     ),
-                    shape = RoundedCornerShape(4.dp) // Added rounded corners
+                    shape = RoundedCornerShape(GameConstants.BoardCornerRadius) // Added rounded corners
                 ) 
         )
 

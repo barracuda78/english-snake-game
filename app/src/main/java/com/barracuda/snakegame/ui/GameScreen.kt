@@ -21,10 +21,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.barracuda.snakegame.Board
 import com.barracuda.snakegame.game.Game
 import com.barracuda.snakegame.ui.theme.*
+import com.barracuda.snakegame.util.GameConstants
 import com.barracuda.snakegame.util.Strings
 
 // Define the gradient brush to be used by buttons
@@ -46,15 +46,15 @@ fun Snake(game: Game) {
         }
         isGameActive && !gameState.isGameOver -> {
             Column(
-                modifier = Modifier.fillMaxSize().padding(8.dp),
+                modifier = Modifier.fillMaxSize().padding(GameConstants.ScreenPadding),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = GameConstants.ScorePaddingHorizontal, vertical = GameConstants.ScorePaddingVertical),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "${Strings.HIGH_SCORE_LABEL}${gameState.highScore}", fontSize = 20.sp, color = UiText)
-                    Text(text = "${Strings.SCORE_LABEL}${gameState.score}", fontSize = 20.sp, color = UiText)
+                    Text(text = "${Strings.HIGH_SCORE_LABEL}${gameState.highScore}", fontSize = GameConstants.ScoreFontSize, color = UiText)
+                    Text(text = "${Strings.SCORE_LABEL}${gameState.score}", fontSize = GameConstants.ScoreFontSize, color = UiText)
                 }
 
                 Box(
@@ -73,9 +73,9 @@ fun Snake(game: Game) {
                 }
                 Button(
                     onClick = { game.togglePause() },
-                    modifier = Modifier.padding(top = 16.dp).fillMaxWidth(0.5f).height(48.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+                    modifier = Modifier.padding(top = GameConstants.PauseButtonPaddingTop).fillMaxWidth(GameConstants.PauseButtonWidth).height(GameConstants.ButtonHeight),
+                    shape = RoundedCornerShape(GameConstants.ButtonCornerRadius),
+                    elevation = ButtonDefaults.elevation(defaultElevation = GameConstants.ButtonElevationDefault, pressedElevation = GameConstants.ButtonElevationPressed),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = Color.Transparent,
                         contentColor = UiText
@@ -85,7 +85,7 @@ fun Snake(game: Game) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                            .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(GameConstants.ButtonCornerRadius)),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(if (isPaused) Strings.RESUME else Strings.PAUSE)
@@ -117,7 +117,7 @@ fun PausedOverlay(isVisible: Boolean) {
             Text(
                 text = Strings.PAUSED,
                 color = UiText,
-                fontSize = 32.sp,
+                fontSize = GameConstants.PausedFontSize,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -134,13 +134,13 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(Strings.APP_NAME, fontSize = 40.sp, fontWeight = FontWeight.Bold, color = UiText)
-        Spacer(modifier = Modifier.height(64.dp))
+        Text(Strings.APP_NAME, fontSize = GameConstants.TitleFontSize, fontWeight = FontWeight.Bold, color = UiText)
+        Spacer(modifier = Modifier.height(GameConstants.StartMenuSpacerHeight))
         Button(
             onClick = onStartClick,
-            modifier = Modifier.fillMaxWidth(0.6f).height(48.dp),
-            shape = RoundedCornerShape(12.dp),
-            elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+            modifier = Modifier.fillMaxWidth(GameConstants.MenuButtonWidth).height(GameConstants.ButtonHeight),
+            shape = RoundedCornerShape(GameConstants.ButtonCornerRadius),
+            elevation = ButtonDefaults.elevation(defaultElevation = GameConstants.ButtonElevationDefault, pressedElevation = GameConstants.ButtonElevationPressed),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color.Transparent,
                 contentColor = UiText
@@ -150,18 +150,18 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                    .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(GameConstants.ButtonCornerRadius)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(Strings.START, fontSize = 20.sp)
+                Text(Strings.START, fontSize = GameConstants.MenuButtonFontSize)
             }
         }
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(GameConstants.MenuButtonSpacerHeight))
         Button(
             onClick = { showInfoDialog = true },
-            modifier = Modifier.fillMaxWidth(0.6f).height(48.dp),
-            shape = RoundedCornerShape(12.dp),
-            elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+            modifier = Modifier.fillMaxWidth(GameConstants.MenuButtonWidth).height(GameConstants.ButtonHeight),
+            shape = RoundedCornerShape(GameConstants.ButtonCornerRadius),
+            elevation = ButtonDefaults.elevation(defaultElevation = GameConstants.ButtonElevationDefault, pressedElevation = GameConstants.ButtonElevationPressed),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color.Transparent,
                 contentColor = UiText
@@ -171,18 +171,18 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                    .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(GameConstants.ButtonCornerRadius)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(Strings.INFO, fontSize = 20.sp)
+                Text(Strings.INFO, fontSize = GameConstants.MenuButtonFontSize)
             }
         }
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(GameConstants.MenuButtonSpacerHeight))
         Button(
             onClick = { activity?.finish() },
-            modifier = Modifier.fillMaxWidth(0.6f).height(48.dp),
-            shape = RoundedCornerShape(12.dp),
-            elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+            modifier = Modifier.fillMaxWidth(GameConstants.MenuButtonWidth).height(GameConstants.ButtonHeight),
+            shape = RoundedCornerShape(GameConstants.ButtonCornerRadius),
+            elevation = ButtonDefaults.elevation(defaultElevation = GameConstants.ButtonElevationDefault, pressedElevation = GameConstants.ButtonElevationPressed),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color.Transparent,
                 contentColor = UiText
@@ -192,10 +192,10 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                    .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(GameConstants.ButtonCornerRadius)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(Strings.EXIT, fontSize = 20.sp)
+                Text(Strings.EXIT, fontSize = GameConstants.MenuButtonFontSize)
             }
         }
     }
@@ -218,14 +218,14 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
             },
             confirmButton = {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp, start = 8.dp, end = 8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = GameConstants.DialogConfirmButtonPaddingBottom, start = GameConstants.DialogConfirmButtonPaddingHorizontal, end = GameConstants.DialogConfirmButtonPaddingHorizontal),
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Button(
                         onClick = { showInfoDialog = false },
-                        modifier = Modifier.fillMaxWidth(0.6f).height(48.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+                        modifier = Modifier.fillMaxWidth(GameConstants.MenuButtonWidth).height(GameConstants.ButtonHeight),
+                        shape = RoundedCornerShape(GameConstants.ButtonCornerRadius),
+                        elevation = ButtonDefaults.elevation(defaultElevation = GameConstants.ButtonElevationDefault, pressedElevation = GameConstants.ButtonElevationPressed),
                         colors = ButtonDefaults.buttonColors(
                             backgroundColor = Color.Transparent,
                             contentColor = UiText
@@ -235,7 +235,7 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                                .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(GameConstants.ButtonCornerRadius)),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(Strings.OK)
@@ -243,7 +243,7 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
                     }
                 }
             },
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(GameConstants.DialogCornerRadius),
             backgroundColor = MaterialTheme.colors.background
         )
     }
@@ -256,16 +256,16 @@ fun GameOverScreen(finalScore: Int, highScore: Int, onRestart: () -> Unit, onExi
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(Strings.GAME_OVER, fontSize = 32.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colors.error)
-        Spacer(modifier = Modifier.height(16.dp))
-        Text("${Strings.YOUR_SCORE_LABEL}$finalScore", fontSize = 24.sp)
-        Text("${Strings.HIGH_SCORE_LABEL}$highScore", fontSize = 20.sp)
-        Spacer(modifier = Modifier.height(32.dp))
+        Text(Strings.GAME_OVER, fontSize = GameConstants.GameOverTitleFontSize, fontWeight = FontWeight.Bold, color = MaterialTheme.colors.error)
+        Spacer(modifier = Modifier.height(GameConstants.GameOverSpacerHeight1))
+        Text("${Strings.YOUR_SCORE_LABEL}$finalScore", fontSize = GameConstants.GameOverScoreFontSize)
+        Text("${Strings.HIGH_SCORE_LABEL}$highScore", fontSize = GameConstants.ScoreFontSize)
+        Spacer(modifier = Modifier.height(GameConstants.GameOverSpacerHeight2))
         Button(
             onClick = onRestart,
-            modifier = Modifier.fillMaxWidth(0.6f).height(48.dp),
-            shape = RoundedCornerShape(12.dp),
-            elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+            modifier = Modifier.fillMaxWidth(GameConstants.MenuButtonWidth).height(GameConstants.ButtonHeight),
+            shape = RoundedCornerShape(GameConstants.ButtonCornerRadius),
+            elevation = ButtonDefaults.elevation(defaultElevation = GameConstants.ButtonElevationDefault, pressedElevation = GameConstants.ButtonElevationPressed),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color.Transparent,
                 contentColor = UiText
@@ -275,18 +275,18 @@ fun GameOverScreen(finalScore: Int, highScore: Int, onRestart: () -> Unit, onExi
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                    .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(GameConstants.ButtonCornerRadius)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(Strings.RESTART)
             }
         }
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(GameConstants.MenuButtonSpacerHeight))
         Button(
             onClick = onExit,
-            modifier = Modifier.fillMaxWidth(0.6f).height(48.dp),
-            shape = RoundedCornerShape(12.dp),
-            elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+            modifier = Modifier.fillMaxWidth(GameConstants.MenuButtonWidth).height(GameConstants.ButtonHeight),
+            shape = RoundedCornerShape(GameConstants.ButtonCornerRadius),
+            elevation = ButtonDefaults.elevation(defaultElevation = GameConstants.ButtonElevationDefault, pressedElevation = GameConstants.ButtonElevationPressed),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color.Transparent,
                 contentColor = UiText
@@ -296,7 +296,7 @@ fun GameOverScreen(finalScore: Int, highScore: Int, onRestart: () -> Unit, onExi
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                    .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(GameConstants.ButtonCornerRadius)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(Strings.EXIT_TO_MENU)
@@ -307,13 +307,13 @@ fun GameOverScreen(finalScore: Int, highScore: Int, onRestart: () -> Unit, onExi
 
 @Composable
 fun Buttons(onDirectionChange: (Pair<Int, Int>) -> Unit) {
-    val buttonSize = Modifier.size(64.dp)
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(24.dp)) {
+    val buttonSize = Modifier.size(GameConstants.ButtonSize)
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(GameConstants.ButtonColumnPadding)) {
         Button(
             onClick = { onDirectionChange(Pair(0, -1)) },
             modifier = buttonSize,
-            shape = RoundedCornerShape(12.dp),
-            elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+            shape = RoundedCornerShape(GameConstants.ButtonCornerRadius),
+            elevation = ButtonDefaults.elevation(defaultElevation = GameConstants.ButtonElevationDefault, pressedElevation = GameConstants.ButtonElevationPressed),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color.Transparent,
                 contentColor = UiText
@@ -323,7 +323,7 @@ fun Buttons(onDirectionChange: (Pair<Int, Int>) -> Unit) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                    .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(GameConstants.ButtonCornerRadius)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(Icons.Default.KeyboardArrowUp, null)
@@ -333,8 +333,8 @@ fun Buttons(onDirectionChange: (Pair<Int, Int>) -> Unit) {
             Button(
                 onClick = { onDirectionChange(Pair(-1, 0)) },
                 modifier = buttonSize,
-                shape = RoundedCornerShape(12.dp),
-                elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+                shape = RoundedCornerShape(GameConstants.ButtonCornerRadius),
+                elevation = ButtonDefaults.elevation(defaultElevation = GameConstants.ButtonElevationDefault, pressedElevation = GameConstants.ButtonElevationPressed),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = Color.Transparent,
                     contentColor = UiText
@@ -344,7 +344,7 @@ fun Buttons(onDirectionChange: (Pair<Int, Int>) -> Unit) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                        .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(GameConstants.ButtonCornerRadius)),
                 contentAlignment = Alignment.Center
                 ) {
                     Icon(Icons.Default.KeyboardArrowLeft, null)
@@ -354,8 +354,8 @@ fun Buttons(onDirectionChange: (Pair<Int, Int>) -> Unit) {
             Button(
                 onClick = { onDirectionChange(Pair(1, 0)) },
                 modifier = buttonSize,
-                shape = RoundedCornerShape(12.dp),
-                elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+                shape = RoundedCornerShape(GameConstants.ButtonCornerRadius),
+                elevation = ButtonDefaults.elevation(defaultElevation = GameConstants.ButtonElevationDefault, pressedElevation = GameConstants.ButtonElevationPressed),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = Color.Transparent,
                     contentColor = UiText
@@ -365,7 +365,7 @@ fun Buttons(onDirectionChange: (Pair<Int, Int>) -> Unit) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                        .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(GameConstants.ButtonCornerRadius)),
                 contentAlignment = Alignment.Center
                 ) {
                     Icon(Icons.Default.KeyboardArrowRight, null)
@@ -375,8 +375,8 @@ fun Buttons(onDirectionChange: (Pair<Int, Int>) -> Unit) {
         Button(
             onClick = { onDirectionChange(Pair(0, 1)) },
             modifier = buttonSize,
-            shape = RoundedCornerShape(12.dp),
-            elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
+            shape = RoundedCornerShape(GameConstants.ButtonCornerRadius),
+            elevation = ButtonDefaults.elevation(defaultElevation = GameConstants.ButtonElevationDefault, pressedElevation = GameConstants.ButtonElevationPressed),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color.Transparent,
                 contentColor = UiText
@@ -386,7 +386,7 @@ fun Buttons(onDirectionChange: (Pair<Int, Int>) -> Unit) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
+                    .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(GameConstants.ButtonCornerRadius)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(Icons.Default.KeyboardArrowDown, null)
@@ -400,9 +400,9 @@ fun AlphabetDisplay(eatenLetterColors: Map<Char, Color>) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(vertical = GameConstants.AlphabetRowPaddingVertical)
             .heightIn(min = 20.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally)
+        horizontalArrangement = Arrangement.spacedBy(GameConstants.AlphabetLetterSpacing, Alignment.CenterHorizontally)
     ) {
         ('A'..'Z').forEach { char ->
             val lowerChar = char.lowercaseChar()
@@ -411,7 +411,7 @@ fun AlphabetDisplay(eatenLetterColors: Map<Char, Color>) {
                 text = char.toString(),
                 color = letterColor,
                 fontWeight = FontWeight.Bold,
-                fontSize = 14.sp
+                fontSize = GameConstants.AlphabetFontSize
             )
         }
     }
