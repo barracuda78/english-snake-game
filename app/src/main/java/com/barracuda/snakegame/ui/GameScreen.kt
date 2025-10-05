@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.barracuda.snakegame.Board
 import com.barracuda.snakegame.game.Game
+import com.barracuda.snakegame.util.Strings
 
 // Define the gradient brush to be used by buttons
 private val diagonalGradientBrush = Brush.linearGradient(
@@ -51,8 +52,8 @@ fun Snake(game: Game) {
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "High: ${gameState.highScore}", fontSize = 20.sp, color = Color.White)
-                    Text(text = "Score: ${gameState.score}", fontSize = 20.sp, color = Color.White)
+                    Text(text = "${Strings.HIGH_SCORE_LABEL}${gameState.highScore}", fontSize = 20.sp, color = Color.White)
+                    Text(text = "${Strings.SCORE_LABEL}${gameState.score}", fontSize = 20.sp, color = Color.White)
                 }
 
                 Box(
@@ -86,7 +87,7 @@ fun Snake(game: Game) {
                             .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(if (isPaused) "Resume" else "Pause")
+                        Text(if (isPaused) Strings.RESUME else Strings.PAUSE)
                     }
                 }
             }
@@ -113,7 +114,7 @@ fun PausedOverlay(isVisible: Boolean) {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "PAUSED",
+                text = Strings.PAUSED,
                 color = Color.White,
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold
@@ -132,7 +133,7 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Snake Game", fontSize = 40.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        Text(Strings.APP_NAME, fontSize = 40.sp, fontWeight = FontWeight.Bold, color = Color.White)
         Spacer(modifier = Modifier.height(64.dp))
         Button(
             onClick = onStartClick,
@@ -151,7 +152,7 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
                     .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Start", fontSize = 20.sp)
+                Text(Strings.START, fontSize = 20.sp)
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -172,7 +173,7 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
                     .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Info", fontSize = 20.sp)
+                Text(Strings.INFO, fontSize = 20.sp)
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -193,7 +194,7 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
                     .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Exit", fontSize = 20.sp)
+                Text(Strings.EXIT, fontSize = 20.sp)
             }
         }
     }
@@ -203,12 +204,12 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
             onDismissRequest = { showInfoDialog = false },
             title = {
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    Text("Game Information", fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(Strings.GAME_INFORMATION_TITLE, fontWeight = FontWeight.Bold, color = Color.White)
                 }
             },
             text = {
                 Text(
-                    "ABC Snake game.\nVersion 0.1.13.\nCreated by Andrei Ruzaev.\nCopyright 2025",
+                    Strings.GAME_INFORMATION_BODY,
                     color = Color.White,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
@@ -236,7 +237,7 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
                                 .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("OK")
+                            Text(Strings.OK)
                         }
                     }
                 }
@@ -254,10 +255,10 @@ fun GameOverScreen(finalScore: Int, highScore: Int, onRestart: () -> Unit, onExi
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("GAME OVER", fontSize = 32.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colors.error)
+        Text(Strings.GAME_OVER, fontSize = 32.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colors.error)
         Spacer(modifier = Modifier.height(16.dp))
-        Text("Your Score: $finalScore", fontSize = 24.sp)
-        Text("High Score: $highScore", fontSize = 20.sp)
+        Text("${Strings.YOUR_SCORE_LABEL}$finalScore", fontSize = 24.sp)
+        Text("${Strings.HIGH_SCORE_LABEL}$highScore", fontSize = 20.sp)
         Spacer(modifier = Modifier.height(32.dp))
         Button(
             onClick = onRestart,
@@ -276,7 +277,7 @@ fun GameOverScreen(finalScore: Int, highScore: Int, onRestart: () -> Unit, onExi
                     .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Restart")
+                Text(Strings.RESTART)
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -297,7 +298,7 @@ fun GameOverScreen(finalScore: Int, highScore: Int, onRestart: () -> Unit, onExi
                     .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Exit to Menu")
+                Text(Strings.EXIT_TO_MENU)
             }
         }
     }
