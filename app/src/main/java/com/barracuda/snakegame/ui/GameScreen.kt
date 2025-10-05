@@ -259,8 +259,8 @@ fun GameOverScreen(finalScore: Int, highScore: Int, onRestart: () -> Unit, onExi
     ) {
         Text(Strings.GAME_OVER, fontSize = GameConstants.GameOverTitleFontSize, fontWeight = FontWeight.Bold, color = MaterialTheme.colors.error)
         Spacer(modifier = Modifier.height(GameConstants.GameOverSpacerHeight1))
-        Text("${Strings.YOUR_SCORE_LABEL}$finalScore", fontSize = GameConstants.GameOverScoreFontSize)
-        Text("${Strings.HIGH_SCORE_LABEL}$highScore", fontSize = GameConstants.ScoreFontSize)
+        Text("${Strings.YOUR_SCORE_LABEL}$finalScore", fontSize = GameConstants.GameOverScoreFontSize, color = UiText)
+        Text("${Strings.HIGH_SCORE_LABEL}$highScore", fontSize = GameConstants.ScoreFontSize, color = UiText)
         Spacer(modifier = Modifier.height(GameConstants.GameOverSpacerHeight2))
         Button(
             onClick = onRestart,

@@ -135,6 +135,7 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
             distractorLetterColor = initialDistractorLetterColor,
             snake = initialSnakeBodySegments,
             score = 0,
+            speed = 0,
             eatenLetterColors = emptyMap(),
             highScore = this.highScore,
             isGameOver = false
@@ -194,9 +195,6 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
         mutableState.value = createInitialGameState()
 
         scope.launch {
-            var snakeLength = INITIAL_SNAKE_LENGTH
-            var currentScore = 0
-
             gameLoop@ while (true) {
                 if (!isGameActive.value) {
                     delay(100L)
@@ -208,11 +206,10 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
                     continue@gameLoop
                 }
 
-                val foodEaten = snakeLength - INITIAL_SNAKE_LENGTH
+                val foodEaten = mutableState.value.snake.size - INITIAL_SNAKE_LENGTH
                 val currentDelay = BASE_DELAY_MS - (foodEaten * DELAY_DECREASE_PER_FOOD_MS)
                 val actualDelay = currentDelay.coerceAtLeast(MIN_DELAY_MS)
                 val speed = ((BASE_DELAY_MS - actualDelay) * 100 / (BASE_DELAY_MS - MIN_DELAY_MS)).toInt()
-
 
                 delay(actualDelay)
                 mutableState.update { currentState ->
@@ -236,14 +233,15 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
                     var nextDistractorLetter = currentState.distractorLetter
                     var nextDistractorLetterColor = currentState.distractorLetterColor
                     var nextDistractorLetterPosition = currentState.distractorLetterPosition
-                    var newScore = currentScore
+                    var newScore = currentState.score
                     var updatedEatenLetterColors = currentState.eatenLetterColors
 
                     var newHeadColor: Color
                     var nextSnakeBody: List<SnakeSegment>
+                    var newSnakeLength = currentState.snake.size
 
                     if (newHeadPosition == currentState.targetLetterPosition) {
-                        snakeLength++
+                        newSnakeLength++
                         newScore += 5
                         playSound(correctEatSoundId)
                         updatedEatenLetterColors = currentState.eatenLetterColors +
@@ -251,7 +249,7 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
                         newHeadColor = currentState.targetLetterColor
 
                         val newHeadSegment = SnakeSegment(newHeadPosition, newHeadColor)
-                        nextSnakeBody = listOf(newHeadSegment) + currentState.snake.take(snakeLength - 1)
+                        nextSnakeBody = listOf(newHeadSegment) + currentState.snake.take(newSnakeLength - 1)
 
                         nextTargetLetter =
                             if (currentState.targetLetter == 'z') 'a' else currentState.targetLetter + 1
@@ -269,7 +267,7 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
                         newHeadColor = currentState.distractorLetterColor
 
                         val newHeadSegment = SnakeSegment(newHeadPosition, newHeadColor)
-                        nextSnakeBody = listOf(newHeadSegment) + currentState.snake.take(snakeLength - 1)
+                        nextSnakeBody = listOf(newHeadSegment) + currentState.snake.take(newSnakeLength - 1)
 
                         nextDistractorLetter = generateRandomLetter(exclude = currentState.targetLetter)
                         nextDistractorLetterColor = foodColors.random(random)
@@ -277,10 +275,9 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
                             generateRandomSafePosition(nextSnakeBody, currentState.targetLetterPosition)
 
                     } else if (currentState.snake.any { it.position == newHeadPosition }) { // Self-collision check
-                        checkAndSaveHighScore(currentScore)
+                        checkAndSaveHighScore(currentState.score)
                         playSound(gameOverSoundId)
                         mutableIsGameActive.value = false
-                        snakeLength = INITIAL_SNAKE_LENGTH
                         return@update currentState.copy(
                             isGameOver = true,
                             highScore = this@Game.highScore
@@ -288,10 +285,8 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
                     } else { // Normal move
                         newHeadColor = currentState.snake.first().color
                         val newHeadSegment = SnakeSegment(newHeadPosition, newHeadColor)
-                        nextSnakeBody = listOf(newHeadSegment) + currentState.snake.take(snakeLength - 1)
+                        nextSnakeBody = listOf(newHeadSegment) + currentState.snake.take(newSnakeLength - 1)
                     }
-
-                    currentScore = newScore
 
                     currentState.copy(
                         targetLetterPosition = nextTargetLetterPosition,
