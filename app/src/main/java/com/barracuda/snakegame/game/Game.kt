@@ -33,6 +33,7 @@ data class State(
     val distractorLetterColor: Color,
     val snake: List<SnakeSegment>,
     val score: Int,
+    val speed: Int = 0,
     val eatenLetterColors: Map<Char, Color> = emptyMap(),
     val highScore: Int = 0,
     val isGameOver: Boolean = false
@@ -210,6 +211,8 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
                 val foodEaten = snakeLength - INITIAL_SNAKE_LENGTH
                 val currentDelay = BASE_DELAY_MS - (foodEaten * DELAY_DECREASE_PER_FOOD_MS)
                 val actualDelay = currentDelay.coerceAtLeast(MIN_DELAY_MS)
+                val speed = ((BASE_DELAY_MS - actualDelay) * 100 / (BASE_DELAY_MS - MIN_DELAY_MS)).toInt()
+
 
                 delay(actualDelay)
                 mutableState.update { currentState ->
@@ -299,6 +302,7 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
                         distractorLetterColor = nextDistractorLetterColor,
                         snake = nextSnakeBody,
                         score = newScore,
+                        speed = speed,
                         eatenLetterColors = updatedEatenLetterColors,
                         highScore = currentState.highScore
                     )

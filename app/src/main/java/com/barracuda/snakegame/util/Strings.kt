@@ -1,7 +1,7 @@
 package com.barracuda.snakegame.util
 
 object Strings {
-    const val APP_NAME = "ABC Snake Game"
+    const val APP_NAME = "Snake Game"
 
     // Menu
     const val START = "Start"
@@ -16,6 +16,7 @@ object Strings {
     // In-Game UI
     const val SCORE_LABEL = "Score: "
     const val HIGH_SCORE_LABEL = "High Score: "
+    const val SPEED_LABEL = "Speed: "
     const val PAUSED = "PAUSED"
     const val RESUME = "Resume"
     const val PAUSE = "Pause"

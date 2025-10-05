@@ -54,6 +54,7 @@ fun Snake(game: Game) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(text = "${Strings.HIGH_SCORE_LABEL}${gameState.highScore}", fontSize = GameConstants.ScoreFontSize, color = UiText)
+                    Text(text = "${Strings.SPEED_LABEL}${gameState.speed}", fontSize = GameConstants.ScoreFontSize, color = UiText)
                     Text(text = "${Strings.SCORE_LABEL}${gameState.score}", fontSize = GameConstants.ScoreFontSize, color = UiText)
                 }
 
