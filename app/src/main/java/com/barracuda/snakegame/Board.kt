@@ -17,9 +17,10 @@ import androidx.compose.ui.text.style.TextAlign // Added for text alignment
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp // For text size
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color // Import for custom color
-import com.barracuda.snakegame.game.Game
+import com.barracuda.snakegame.game.Game // Import Game to access BOARD_SIZE
 import com.barracuda.snakegame.game.State
+import com.barracuda.snakegame.ui.theme.ButtonGradient1
+import com.barracuda.snakegame.ui.theme.ButtonGradient2
 import com.barracuda.snakegame.ui.theme.Shapes
 
 @Composable
@@ -30,11 +31,9 @@ fun Board(state: State) {
 
         // Total available width/height for the bordered box and its content
         val totalAvailableWidth = maxWidth
-        // val totalAvailableHeight = maxHeight // Assuming square board for now
 
         // The area where game elements will be drawn, inside border and inner padding
         val gameContentAreaWidth = totalAvailableWidth - (borderThickness * 2) - (innerContentPadding * 2)
-        // val gameContentAreaHeight = totalAvailableHeight - (borderThickness * 2) - (innerContentPadding * 2)
 
         val tileSize = gameContentAreaWidth / Game.BOARD_SIZE // Tile size based on the actual game content area
 
@@ -47,9 +46,9 @@ fun Board(state: State) {
                         borderThickness,
                         Brush.linearGradient(
                             colors = listOf(
-                                Color(0xFF557eaa),
-                                Color(0xFF337dcc),
-                                Color(0xFF557eaa)
+                                ButtonGradient1,
+                                ButtonGradient2,
+                                ButtonGradient1
                             )
                         )
                     ),

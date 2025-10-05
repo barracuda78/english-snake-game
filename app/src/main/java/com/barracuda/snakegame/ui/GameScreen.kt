@@ -24,11 +24,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.barracuda.snakegame.Board
 import com.barracuda.snakegame.game.Game
+import com.barracuda.snakegame.ui.theme.*
 import com.barracuda.snakegame.util.Strings
 
 // Define the gradient brush to be used by buttons
 private val diagonalGradientBrush = Brush.linearGradient(
-    colors = listOf(Color(0xFF557eaa), Color(0xFF337dcc)),
+    colors = listOf(ButtonGradient1, ButtonGradient2),
     start = Offset(0f, Float.POSITIVE_INFINITY), // Bottom-left
     end = Offset(Float.POSITIVE_INFINITY, 0f)    // Top-right
 )
@@ -52,8 +53,8 @@ fun Snake(game: Game) {
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "${Strings.HIGH_SCORE_LABEL}${gameState.highScore}", fontSize = 20.sp, color = Color.White)
-                    Text(text = "${Strings.SCORE_LABEL}${gameState.score}", fontSize = 20.sp, color = Color.White)
+                    Text(text = "${Strings.HIGH_SCORE_LABEL}${gameState.highScore}", fontSize = 20.sp, color = UiText)
+                    Text(text = "${Strings.SCORE_LABEL}${gameState.score}", fontSize = 20.sp, color = UiText)
                 }
 
                 Box(
@@ -77,7 +78,7 @@ fun Snake(game: Game) {
                     elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = Color.Transparent,
-                        contentColor = Color.White
+                        contentColor = UiText
                     ),
                     contentPadding = PaddingValues(0.dp)
                 ) {
@@ -109,13 +110,13 @@ fun PausedOverlay(isVisible: Boolean) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.7f))
+                .background(PausedOverlay)
                 .pointerInput(Unit) {},
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = Strings.PAUSED,
-                color = Color.White,
+                color = UiText,
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -133,7 +134,7 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(Strings.APP_NAME, fontSize = 40.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        Text(Strings.APP_NAME, fontSize = 40.sp, fontWeight = FontWeight.Bold, color = UiText)
         Spacer(modifier = Modifier.height(64.dp))
         Button(
             onClick = onStartClick,
@@ -142,7 +143,7 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
             elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color.Transparent,
-                contentColor = Color.White
+                contentColor = UiText
             ),
             contentPadding = PaddingValues(0.dp)
         ) {
@@ -163,7 +164,7 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
             elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color.Transparent,
-                contentColor = Color.White
+                contentColor = UiText
             ),
             contentPadding = PaddingValues(0.dp)
         ) {
@@ -184,7 +185,7 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
             elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color.Transparent,
-                contentColor = Color.White
+                contentColor = UiText
             ),
             contentPadding = PaddingValues(0.dp)
         ) {
@@ -204,13 +205,13 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
             onDismissRequest = { showInfoDialog = false },
             title = {
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    Text(Strings.GAME_INFORMATION_TITLE, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(Strings.GAME_INFORMATION_TITLE, fontWeight = FontWeight.Bold, color = UiText)
                 }
             },
             text = {
                 Text(
                     Strings.GAME_INFORMATION_BODY,
-                    color = Color.White,
+                    color = UiText,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -227,7 +228,7 @@ fun StartMenuScreen(onStartClick: () -> Unit) {
                         elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
                         colors = ButtonDefaults.buttonColors(
                             backgroundColor = Color.Transparent,
-                            contentColor = Color.White
+                            contentColor = UiText
                         ),
                         contentPadding = PaddingValues(0.dp)
                     ) {
@@ -267,7 +268,7 @@ fun GameOverScreen(finalScore: Int, highScore: Int, onRestart: () -> Unit, onExi
             elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color.Transparent,
-                contentColor = Color.White
+                contentColor = UiText
             ),
             contentPadding = PaddingValues(0.dp)
         ) {
@@ -288,7 +289,7 @@ fun GameOverScreen(finalScore: Int, highScore: Int, onRestart: () -> Unit, onExi
             elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color.Transparent,
-                contentColor = Color.White
+                contentColor = UiText
             ),
             contentPadding = PaddingValues(0.dp)
         ) {
@@ -315,7 +316,7 @@ fun Buttons(onDirectionChange: (Pair<Int, Int>) -> Unit) {
             elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color.Transparent,
-                contentColor = Color.White
+                contentColor = UiText
             ),
             contentPadding = PaddingValues(0.dp)
         ) {
@@ -336,7 +337,7 @@ fun Buttons(onDirectionChange: (Pair<Int, Int>) -> Unit) {
                 elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = Color.Transparent,
-                    contentColor = Color.White
+                    contentColor = UiText
                 ),
                 contentPadding = PaddingValues(0.dp)
             ) {
@@ -357,7 +358,7 @@ fun Buttons(onDirectionChange: (Pair<Int, Int>) -> Unit) {
                 elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = Color.Transparent,
-                    contentColor = Color.White
+                    contentColor = UiText
                 ),
                 contentPadding = PaddingValues(0.dp)
             ) {
@@ -378,7 +379,7 @@ fun Buttons(onDirectionChange: (Pair<Int, Int>) -> Unit) {
             elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 4.dp),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color.Transparent,
-                contentColor = Color.White
+                contentColor = UiText
             ),
             contentPadding = PaddingValues(0.dp)
         ) {

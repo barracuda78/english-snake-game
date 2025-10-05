@@ -6,6 +6,7 @@ import android.media.SoundPool
 import android.util.Log
 import androidx.compose.ui.graphics.Color
 import com.barracuda.snakegame.R
+import com.barracuda.snakegame.ui.theme.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +28,7 @@ data class State(
     val distractorLetterColor: Color,
     val snake: List<SnakeSegment>,
     val score: Int,
-    val eatenLetterColors: Map<Char, Color> = emptyMap(), // Changed from eatenLetters
+    val eatenLetterColors: Map<Char, Color> = emptyMap(),
     val highScore: Int = 0,
     val isGameOver: Boolean = false
 )
@@ -35,13 +36,13 @@ data class State(
 class Game(private val scope: CoroutineScope, private val context: Context) {
 
     private val foodColors: List<Color> = listOf(
-        Color.Red,
-        Color(0xFF007BFF), // Bright Blue
-        Color.Yellow,
-        Color.Magenta,
-        Color.White,
-        Color(0xFFFFA500), // Orange
-        Color.Cyan
+        FoodRed,
+        FoodBlue,
+        FoodYellow,
+        FoodMagenta,
+        UiText, // White
+        FoodOrange,
+        FoodCyan
     )
     private val random = Random.Default
 
@@ -307,7 +308,7 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
         const val BASE_DELAY_MS = 200L
         const val MIN_DELAY_MS = 50L
         const val DELAY_DECREASE_PER_FOOD_MS = 5L
-        private val INITIAL_SNAKE_COLORS = listOf(Color(0xFF00ffee))
+        private val INITIAL_SNAKE_COLORS = listOf(SnakeHeadColor)
         private const val SNAKE_GAME_PREFS = "SnakeGamePrefs"
         private const val HIGH_SCORE_KEY = "HighScore"
     }
