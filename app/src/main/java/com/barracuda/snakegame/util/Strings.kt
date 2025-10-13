@@ -9,6 +9,9 @@ object Strings {
     const val EXIT = "Exit"
     const val OK = "OK"
 
+    // Splash Screen
+    const val SPLASH_SCREEN_TEXT = "Level 1: Alphabet"
+
     // Game Info Dialog
     const val GAME_INFORMATION_TITLE = "Game Information"
     const val GAME_INFORMATION_BODY = "ABC Snake game.\nVersion 0.1.13.\nCreated by Andrei Ruzaev.\nCopyright 2025"

@@ -36,7 +36,8 @@ data class State(
     val speed: Int = 0,
     val eatenLetterColors: Map<Char, Color> = emptyMap(),
     val highScore: Int = 0,
-    val isGameOver: Boolean = false
+    val isGameOver: Boolean = false,
+    val isShowingSplash: Boolean = false
 )
 
 class Game(private val scope: CoroutineScope, private val context: Context) {
@@ -151,11 +152,17 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
     }
 
     fun startGame() {
-        playSound(gameStartSoundId)
-        mutableIsGameActive.value = true
-        mutableIsPaused.value = false
-        mutableState.value = createInitialGameState()
-        move = Pair(1, 0)
+        scope.launch {
+            mutableState.update { it.copy(isShowingSplash = true) }
+            delay(2000) // Show splash for 2 seconds
+            mutableState.update { it.copy(isShowingSplash = false) }
+
+            playSound(gameStartSoundId)
+            mutableIsGameActive.value = true
+            mutableIsPaused.value = false
+            mutableState.value = createInitialGameState()
+            move = Pair(1, 0)
+        }
     }
 
     fun restartGame() {

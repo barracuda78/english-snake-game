@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.barracuda.snakegame.Board
 import com.barracuda.snakegame.game.Game
 import com.barracuda.snakegame.ui.theme.*
@@ -41,6 +42,9 @@ fun Snake(game: Game) {
     val isGameActive by game.isGameActive.collectAsState()
 
     when {
+        gameState.isShowingSplash -> {
+            SplashScreen()
+        }
         !isGameActive && !gameState.isGameOver -> {
             StartMenuScreen(onStartClick = { game.startGame() })
         }
@@ -122,6 +126,23 @@ fun Snake(game: Game) {
                 onExit = { game.returnToMenu() }
             )
         }
+    }
+}
+
+@Composable
+fun SplashScreen() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colors.background),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = Strings.SPLASH_SCREEN_TEXT,
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Bold,
+            color = UiText
+        )
     }
 }
 
