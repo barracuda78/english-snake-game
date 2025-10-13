@@ -92,6 +92,26 @@ fun Snake(game: Game) {
                         Text(if (isPaused) Strings.RESUME else Strings.PAUSE)
                     }
                 }
+                Button(
+                    onClick = { game.returnToMenu() },
+                    modifier = Modifier.padding(top = GameConstants.MenuButtonSpacerHeight).fillMaxWidth(GameConstants.PauseButtonWidth).height(GameConstants.ButtonHeight),
+                    shape = RoundedCornerShape(GameConstants.ButtonCornerRadius),
+                    elevation = ButtonDefaults.elevation(defaultElevation = GameConstants.ButtonElevationDefault, pressedElevation = GameConstants.ButtonElevationPressed),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color.Transparent,
+                        contentColor = UiText
+                    ),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(brush = diagonalGradientBrush, shape = RoundedCornerShape(GameConstants.ButtonCornerRadius)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(Strings.EXIT)
+                    }
+                }
             }
         }
         gameState.isGameOver -> {

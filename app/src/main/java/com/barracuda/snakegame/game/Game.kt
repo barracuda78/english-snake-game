@@ -53,6 +53,7 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
     private val random = Random.Default
 
     private lateinit var soundPool: SoundPool
+    private var gameStartSoundId: Int = 0
     private var correctEatSoundId: Int = 0
     private var wrongEatSoundId: Int = 0
     private var gameOverSoundId: Int = 0
@@ -150,6 +151,7 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
     }
 
     fun startGame() {
+        playSound(gameStartSoundId)
         mutableIsGameActive.value = true
         mutableIsPaused.value = false
         mutableState.value = createInitialGameState()
@@ -176,6 +178,7 @@ class Game(private val scope: CoroutineScope, private val context: Context) {
             .setAudioAttributes(audioAttributes)
             .build()
 
+        gameStartSoundId = soundPool.load(context, R.raw.game_start, 1)
         correctEatSoundId = soundPool.load(context, R.raw.correct_eat, 1)
         wrongEatSoundId = soundPool.load(context, R.raw.wrong_eat, 1)
         gameOverSoundId = soundPool.load(context, R.raw.game_over, 1)
